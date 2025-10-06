@@ -1,0 +1,56 @@
+2025-10-06 18:40:47,299 - LMS - INFO - Employee signup request received for email=user@example.com
+2025-10-06 18:41:17,755 - LMS - ERROR - Signup failed for Manager=Pratham: localhost:27017: [WinError 10061] No connection could be made because the target machine actively refused it (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms), Timeout: 30s, Topology Description: <TopologyDescription id: 68e3bf84bfa429ca7a9b84e0, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('localhost:27017: [WinError 10061] No connection could be made because the target machine actively refused it (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>]>
+2025-10-06 19:13:55,879 - LMS - INFO - Employee signup request received for email=Pr@example.com
+2025-10-06 19:13:55,910 - LMS - ERROR - Signup failed for Manager=Pratham: bcrypt: no backends available -- recommend you install one (e.g. 'pip install bcrypt')
+2025-10-06 19:17:08,855 - LMS - INFO - Employee signup request received for email=Pr@example.com
+2025-10-06 19:17:08,872 - LMS - ERROR - Signup failed for Manager=Pratham: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-10-06 19:18:28,186 - LMS - INFO - Employee signup request received for email=Pr@example.com
+2025-10-06 19:18:28,198 - LMS - ERROR - Signup failed for Manager=Pratham: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-10-06 19:23:07,929 - LMS - INFO - Employee signup request received for email=Pr@gmail.com
+2025-10-06 19:23:07,968 - LMS - ERROR - Signup failed for Manager=Pr: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-10-06 19:24:26,377 - LMS - INFO - Employee signup request received for email=uPr@gamil.com
+2025-10-06 19:24:26,410 - LMS - ERROR - Signup failed for Manager=Pr: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-10-06 19:30:46,376 - LMS - INFO - Employee signup request received for email=Pr@gmail.com
+2025-10-06 19:30:46,404 - LMS - ERROR - Signup failed for Manager=Pr: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-10-06 19:41:54,514 - LMS - INFO - Employee signup request received for email=Pr@gamil.com
+2025-10-06 19:41:54,847 - LMS - INFO - Created user name=Pr email=Pr@gamil.com role=Employee
+2025-10-06 19:41:54,878 - LMS - INFO - Employee registered successfully: Pr@gamil.com
+2025-10-06 20:05:14,356 - LMS - INFO - Employee Login request received for email=use@gmail.com
+2025-10-06 20:05:14,357 - LMS - INFO - Authentication attempt for email=use@gmail.com
+2025-10-06 20:05:14,359 - LMS - WARNING - Authentication failed: user not found, email=use@gmail.com
+2025-10-06 20:06:13,922 - LMS - INFO - Employee Login request received for email=Pr@gmail.com
+2025-10-06 20:06:13,923 - LMS - INFO - Authentication attempt for email=Pr@gmail.com
+2025-10-06 20:06:13,924 - LMS - WARNING - Authentication failed: user not found, email=Pr@gmail.com
+2025-10-06 20:06:14,966 - LMS - INFO - Employee Login request received for email=Pr@gmail.com
+2025-10-06 20:06:14,968 - LMS - INFO - Authentication attempt for email=Pr@gmail.com
+2025-10-06 20:06:14,970 - LMS - WARNING - Authentication failed: user not found, email=Pr@gmail.com
+2025-10-06 20:06:15,795 - LMS - INFO - Employee Login request received for email=Pr@gmail.com
+2025-10-06 20:06:15,795 - LMS - INFO - Authentication attempt for email=Pr@gmail.com
+2025-10-06 20:06:15,796 - LMS - WARNING - Authentication failed: user not found, email=Pr@gmail.com
+2025-10-06 20:07:26,042 - LMS - INFO - Employee signup request received for email=Pr@gmail.com
+2025-10-06 20:07:26,312 - LMS - INFO - Created user name=Pr email=Pr@gmail.com role=Employee
+2025-10-06 20:07:26,312 - LMS - INFO - Employee registered successfully: Pr@gmail.com
+2025-10-06 20:07:49,266 - LMS - INFO - Employee Login request received for email=use@gmail.com
+2025-10-06 20:07:49,266 - LMS - INFO - Authentication attempt for email=use@gmail.com
+2025-10-06 20:07:49,267 - LMS - WARNING - Authentication failed: user not found, email=use@gmail.com
+2025-10-06 20:08:10,068 - LMS - INFO - Employee Login request received for email=Pr@gmail.com
+2025-10-06 20:08:10,068 - LMS - INFO - Authentication attempt for email=Pr@gmail.com
+2025-10-06 20:08:10,389 - LMS - INFO - Authentication successful for email=Pr@gmail.com
+2025-10-06 20:08:10,390 - LMS - INFO - Employee login successful for email=Pr@gmail.com
+2025-10-06 20:09:13,407 - LMS - INFO - Manager signup request received for email=Pratham@gamil.com
+2025-10-06 20:09:13,697 - LMS - INFO - Created user name=Pratham email=Pratham@gamil.com role=Manager
+2025-10-06 20:09:13,697 - LMS - INFO - Manager registered successfully: Pratham@gamil.com
+2025-10-06 20:09:39,564 - LMS - INFO - Manager Login request received for email=man@gamil.com
+2025-10-06 20:09:39,565 - LMS - INFO - Authentication attempt for email=man@gamil.com
+2025-10-06 20:09:39,568 - LMS - WARNING - Authentication failed: user not found, email=man@gamil.com
+2025-10-06 20:10:15,510 - LMS - INFO - Manager Login request received for email=Pratham@gamil.com
+2025-10-06 20:10:15,511 - LMS - INFO - Authentication attempt for email=Pratham@gamil.com
+2025-10-06 20:10:15,781 - LMS - INFO - Authentication successful for email=Pratham@gamil.com
+2025-10-06 20:10:15,781 - LMS - INFO - Manager login successful for email=Pratham@gamil.com
+2025-10-06 20:10:26,750 - LMS - INFO - Manager Login request received for email=Pratham@gamil.com
+2025-10-06 20:10:26,750 - LMS - INFO - Authentication attempt for email=Pratham@gamil.com
+2025-10-06 20:10:27,077 - LMS - WARNING - Authentication failed: invalid password, email=Pratham@gamil.com
+2025-10-06 20:10:40,074 - LMS - INFO - Manager Login request received for email=Pratham@gamil.com
+2025-10-06 20:10:40,075 - LMS - INFO - Authentication attempt for email=Pratham@gamil.com
+2025-10-06 20:10:40,432 - LMS - INFO - Authentication successful for email=Pratham@gamil.com
+2025-10-06 20:10:40,433 - LMS - INFO - Manager login successful for email=Pratham@gamil.com
