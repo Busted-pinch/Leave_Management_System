@@ -15,16 +15,17 @@
 ```bash
 git clone https://github.com/Busted-pinch/Leave_Management_System.git
 cd Leave_Management_System
+```
 
 ### 1. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
-###2. Configure Environment Variables
+2. Configure Environment Variables
 
 Create a .env file and add your configuration (DB connection, secret keys, etc.)
 
-###3. Run the Application
+3. Run the Application
 ```bash
 python main.py
 ```
@@ -34,45 +35,45 @@ python main.py
 
 ##📝 Usage
 
-###1. Sign up as an Employee 👨‍💼 or Manager 👩‍💼.
-###2. Employees can apply for leaves 🏖️ and view leave history 📜.
-###3. Managers can approve/reject leaves ✅❌ and generate reports 📊.
-###4. HR can monitor leave balances 📋 and analytics 📈.
+1. Sign up as an Employee 👨‍💼 or Manager 👩‍💼.
+2. Employees can apply for leaves 🏖️ and view leave history 📜.
+3. Managers can approve/reject leaves ✅❌ and generate reports 📊.
+4. HR can monitor leave balances 📋 and analytics 📈.
 
 ##🛠️ Tech Stack
 
-###1. Backend: Python 🐍 / FastAPI
-###2. Database: MongoDB 🍃
-###3. Frontend: HTML, CSS, JavaScript (or React) ⚛️
-###4. Authentication: JWT 🔐
+1. Backend: Python 🐍 / FastAPI
+2. Database: MongoDB 🍃
+3. Frontend: HTML, CSS, JavaScript (or React) ⚛️
+4. Authentication: JWT 🔐
 
 ##🤝 Contributing
 
-###We welcome contributions! To contribute:
-####1. Fork the repository 🍴
-####2. Create a new branch:
+We welcome contributions! To contribute:
+1. Fork the repository 🍴
+2. Create a new branch:
 ```bash
 git checkout -b feature-name
 ```
-####3. Make your changes and commit:
+3. Make your changes and commit:
 ```bash
 git commit -m "Add feature"
 ```
-####4. Push to your branch:
+4. Push to your branch:
 ```bash
 git push origin feature-name
 ```
-####5. Create a Pull Request 🔃
+5. Create a Pull Request 🔃
 
 ##📄 License
 
-###This project is licensed under the MIT License.
+This project is licensed under the MIT License.
 
 ##📬 Contact
 
-###Backend dev: Prathamesh Mete
-###**GitHub**: [Busted-pinch](https://github.com/Busted-pinch)
-###Email: metepratham04@gmail.com
+Backend dev: Prathamesh Mete
+GitHub: [Busted-pinch](https://github.com/Busted-pinch)
+Email: metepratham04@gmail.com
 
 
 
