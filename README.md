@@ -71,9 +71,10 @@ This project is licensed under the MIT License.
 
 📬 Contact
 
-Backend dev: Prathamesh Mete
-GitHub: [Busted-pinch](https://github.com/Busted-pinch)
-Email: metepratham04@gmail.com
+- **Backend dev**: Prathamesh Mete  
+- **GitHub**: [Busted-pinch](https://github.com/Busted-pinch)  
+- **Email**: metepratham04@gmail.com
+
 
 
 
