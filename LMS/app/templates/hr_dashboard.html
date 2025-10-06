@@ -244,7 +244,6 @@
     </style>
 </head>
 <body>
-    <!-- Animated Background -->
     <div class="animated-bg">
         <div class="circle circle-1"></div>
         <div class="circle circle-2"></div>
@@ -252,7 +251,6 @@
         <div class="circle circle-4"></div>
     </div>
 
-    <!-- HR Dashboard -->
     <div class="dashboard-container">
         <nav class="navbar">
             <div class="navbar-brand">
@@ -284,7 +282,6 @@
         </nav>
 
         <div class="dashboard-content">
-            <!-- Profile Section -->
             <div id="hrProfileSection" class="page-section active">
                 <div class="section-header">
                     <h2><i class="fas fa-user-circle"></i> HR Profile</h2>
@@ -299,28 +296,28 @@
                             <div class="info-icon"><i class="fas fa-user"></i></div>
                             <div class="info-content">
                                 <span class="info-label">Full Name</span>
-                                <span class="info-value">Sarah Johnson</span>
+                                <span class="info-value" id="hrName"></span>
                             </div>
                         </div>
                         <div class="info-row">
                             <div class="info-icon"><i class="fas fa-envelope"></i></div>
                             <div class="info-content">
                                 <span class="info-label">Email Address</span>
-                                <span class="info-value">sarah.johnson@company.com</span>
+                                <span class="info-value" id="hrEmail"></span>
                             </div>
                         </div>
                         <div class="info-row">
                             <div class="info-icon"><i class="fas fa-building"></i></div>
                             <div class="info-content">
                                 <span class="info-label">Department</span>
-                                <span class="info-value">Human Resources</span>
+                                <span class="info-value" id="hrDepartment"></span>
                             </div>
                         </div>
                         <div class="info-row">
                             <div class="info-icon"><i class="fas fa-id-badge"></i></div>
                             <div class="info-content">
                                 <span class="info-label">HR ID</span>
-                                <span class="info-value">HR001</span>
+                                <span class="info-value" id="hrId"></span>
                             </div>
                         </div>
                     </div>
@@ -331,20 +328,18 @@
                 </div>
             </div>
 
-            <!-- Leave Requests Section -->
             <div id="hrRequestsSection" class="page-section">
                 <div class="section-header">
                     <h2><i class="fas fa-inbox"></i> Leave Requests</h2>
                     <p>Review and manage pending leave applications</p>
                 </div>
 
-                <!-- Statistics Cards -->
                 <div class="stats-grid">
                     <div class="stat-card pending">
                         <div class="stat-icon">
                             <i class="fas fa-hourglass-half"></i>
                         </div>
-                        <div class="stat-value" id="pendingCount">3</div>
+                        <div class="stat-value" id="pendingCount">0</div>
                         <div class="stat-label">Pending Requests</div>
                     </div>
                     <div class="stat-card approved">
@@ -364,11 +359,9 @@
                 </div>
 
                 <div class="leave-cards" id="pendingLeaveCards">
-                    <!-- Pending leave requests will be displayed here -->
-                </div>
+                    </div>
             </div>
 
-            <!-- Approved Leaves Section -->
             <div id="hrApprovedSection" class="page-section">
                 <div class="section-header">
                     <h2><i class="fas fa-check-circle"></i> Approved Leaves</h2>
@@ -376,11 +369,9 @@
                 </div>
 
                 <div class="leave-cards" id="approvedLeaveCards">
-                    <!-- Approved leave requests will be displayed here -->
-                </div>
+                    </div>
             </div>
 
-            <!-- Rejected Leaves Section -->
             <div id="hrRejectedSection" class="page-section">
                 <div class="section-header">
                     <h2><i class="fas fa-times-circle"></i> Rejected Leaves</h2>
@@ -388,52 +379,14 @@
                 </div>
 
                 <div class="leave-cards" id="rejectedLeaveCards">
-                    <!-- Rejected leave requests will be displayed here -->
-                </div>
+                    </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Sample leave data - In production, this would come from backend API
-        let leaveRequests = [
-            {
-                id: 1,
-                employeeName: "John Doe",
-                department: "Information Technology",
-                leaveTitle: "Medical Leave",
-                startDate: "2025-10-15",
-                endDate: "2025-10-17",
-                days: 3,
-                description: "Need to undergo medical checkup and treatment. Doctor's appointment scheduled.",
-                status: "pending",
-                icon: "fas fa-hospital"
-            },
-            {
-                id: 2,
-                employeeName: "Emily Smith",
-                department: "Marketing",
-                leaveTitle: "Annual Vacation",
-                startDate: "2025-11-01",
-                endDate: "2025-11-10",
-                days: 10,
-                description: "Planning a family vacation. All pending work will be completed before departure.",
-                status: "pending",
-                icon: "fas fa-umbrella-beach"
-            },
-            {
-                id: 3,
-                employeeName: "Michael Brown",
-                department: "Finance",
-                leaveTitle: "Personal Leave",
-                startDate: "2025-10-20",
-                endDate: "2025-10-22",
-                days: 3,
-                description: "Need to attend to personal matters. Will be available on phone for urgent issues.",
-                status: "pending",
-                icon: "fas fa-user"
-            }
-        ];
+        // data to be fetched dynamically
+        let leaveRequests = [];
 
         // Initialize dashboard on load
         document.addEventListener('DOMContentLoaded', function() {
