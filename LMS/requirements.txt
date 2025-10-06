@@ -1,4 +1,0 @@
-pip install pydantic[email] 
-pip install bcrypt==3.2.2
-
-pip install fastapi uvicorn pymongo python-jose[cryptography] passlib python-dotenv
