@@ -1,0 +1,9 @@
+pydantic[email] 
+bcrypt==3.2.2
+jinja2
+fastapi[all]
+uvicorn
+pymongo
+python-jose[cryptography]
+passlib
+python-dotenv
