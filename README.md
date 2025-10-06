@@ -33,21 +33,21 @@ python main.py
 🌐 (adjust based on your app)
 
 
-##📝 Usage
+📝 Usage
 
 1. Sign up as an Employee 👨‍💼 or Manager 👩‍💼.
 2. Employees can apply for leaves 🏖️ and view leave history 📜.
 3. Managers can approve/reject leaves ✅❌ and generate reports 📊.
 4. HR can monitor leave balances 📋 and analytics 📈.
 
-##🛠️ Tech Stack
+🛠️ Tech Stack
 
 1. Backend: Python 🐍 / FastAPI
 2. Database: MongoDB 🍃
 3. Frontend: HTML, CSS, JavaScript (or React) ⚛️
 4. Authentication: JWT 🔐
 
-##🤝 Contributing
+🤝 Contributing
 
 We welcome contributions! To contribute:
 1. Fork the repository 🍴
@@ -65,11 +65,11 @@ git push origin feature-name
 ```
 5. Create a Pull Request 🔃
 
-##📄 License
+📄 License
 
 This project is licensed under the MIT License.
 
-##📬 Contact
+📬 Contact
 
 Backend dev: Prathamesh Mete
 GitHub: [Busted-pinch](https://github.com/Busted-pinch)
