@@ -3,7 +3,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/Busted-pinch/Leave_Management_System)
 ![GitHub contributors](https://img.shields.io/github/contributors/Busted-pinch/Leave_Management_System)
 ![GitHub issues](https://img.shields.io/github/issues/Busted-pinch/Leave_Management_System)
-![GitHub license](https://img.shields.io/github/license/Busted-pinch/Leave_Management_System)
+![GitHub license](https://img.shields.io/github/Busted-pinch/Leave_Management_System/LICENSE)
 
 ✨ **Empower your managerial processes with the Employee Leave Management System!**
 
