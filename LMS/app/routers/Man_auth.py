@@ -1,9 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from app.models.schemas import Man_login_Input, Man_create_Input, Signup_response, Login_TokenOutput
 from app.services.auth_service import create_user, authenticate_user, create_access_token
 from app.utils.logger import logger  
 
+templates = Jinja2Templates(directory="app/templates")
 router = APIRouter(prefix="/api/v1/Man_auth", tags=["Auth"])
+
 
 @router.post("/Manager_signup", response_model=Signup_response)
 def Emp_signup(data: Man_create_Input):
@@ -29,3 +33,8 @@ def login(data: Man_login_Input):
     token = create_access_token({"sub": data.email})
     logger.info("Manager login successful for email=%s", data.email)
     return {"access_token": token, "token_type": "bearer"}
+
+
+@router.get("/hr_dashboard", response_class=HTMLResponse)
+async def get_hr_dashboard(request: Request):
+    return templates.TemplateResponse("hr_dashboard.html", {"request": request})

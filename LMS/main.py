@@ -1,11 +1,13 @@
+import os
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-
-app= FastAPI()
 # ==============================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = FastAPI(title="Employee Leave Management System - Unified Backend")
 
 templates = Jinja2Templates(directory="app/templates")  # point to your templates folder
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -15,11 +17,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def read_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# HR dashboard
-@app.get("/hr", response_class=HTMLResponse)
-def hr_dashboard(request: Request):
-    return templates.TemplateResponse("hr_dashboard.html", {"request": request})
-
 # Import all routers
 # NOTE: This assumes the routers are correctly structured in the app/routers directory
 from app.routers import (
@@ -27,7 +24,6 @@ from app.routers import (
     Man_auth,
 )
 
-app = FastAPI(title="Employee Leave Management System - Unified Backend")
 
 # ==============================
 # CORS setup
@@ -62,6 +58,6 @@ app.include_router(Man_auth.router)
 # ==============================
 # Root endpoint
 # ==============================
-@app.get("/")
-def root():
-    return {"message": "Employee Leave MAnagement System Unified Backend is running!"}
+@app.get("/api/v1/test")
+def test():
+    return {"message": "Unified backend connected successfully!"}

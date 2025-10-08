@@ -55,7 +55,7 @@ function showDashboardSection(section) {
     navItems.forEach(item => item.classList.remove('active'));
     sections.forEach(sec => sec.classList.remove('active'));
     
-    event.target.classList.add('active');
+    event.target.closest('.nav-item').classList.add('active');
     
     if (section === 'profile') {
         document.getElementById('profileSection').classList.add('active');
@@ -71,41 +71,43 @@ function showDashboardSection(section) {
 // Form Submissions
 function loginEmployee(event) {
     event.preventDefault();
+    // TODO: Implement backend login logic.
+    // On success, populate user data and show dashboard.
     alert('Employee login successful!');
-    showPage('dashboard');
-}
-
-function loginHR(event) {
-    event.preventDefault();
-    alert('HR login successful!');
     showPage('dashboard');
 }
 
 function registerEmployee(event) {
     event.preventDefault();
+    // TODO: Implement backend registration logic.
     alert('Employee registration successful! Please login.');
     showPage('login');
 }
 
 function registerHR(event) {
     event.preventDefault();
+    // TODO: Implement backend registration logic.
     alert('HR registration successful! Please login.');
     showPage('login');
 }
 
 function submitLeave(event) {
     event.preventDefault();
+    // TODO: Implement backend logic to submit leave.
     alert('Leave request submitted successfully!');
     event.target.reset();
 }
 
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
+        // TODO: Add backend logout logic if necessary (e.g., invalidate session).
         showPage('login');
     }
 }
 
 function loginHR(event) {
     event.preventDefault();
+    // TODO: Implement backend login logic before redirect.
+    // On success, redirect to the HR dashboard.
     window.location.href = 'hr_dashboard.html';
 }

@@ -60,3 +60,19 @@
 2025-10-06 21:56:01,303 - LMS - INFO - Manager signup request received for email=Pra@gmail.com
 2025-10-06 21:56:01,903 - LMS - INFO - Created user name=Pratham email=Pra@gmail.com role=Manager
 2025-10-06 21:56:01,922 - LMS - INFO - Manager registered successfully: Pra@gmail.com
+2025-10-07 13:54:53,451 - LMS - INFO - Manager Login request received for email=Pra@gmail.com
+2025-10-07 13:54:53,453 - LMS - INFO - Authentication attempt for email=Pra@gmail.com
+2025-10-07 13:54:54,056 - LMS - WARNING - Authentication failed: invalid password, email=Pra@gmail.com
+2025-10-07 13:55:06,946 - LMS - INFO - Manager Login request received for email=Pra@gmail.com
+2025-10-07 13:55:06,947 - LMS - INFO - Authentication attempt for email=Pra@gmail.com
+2025-10-07 13:55:07,483 - LMS - WARNING - Authentication failed: invalid password, email=Pra@gmail.com
+2025-10-07 13:55:56,600 - LMS - INFO - Manager signup request received for email=Pra@gmail.com
+2025-10-07 13:55:56,602 - LMS - WARNING - Attempt to re-register email: Pra@gmail.com
+2025-10-07 13:55:56,603 - LMS - ERROR - Signup failed for Manager=Pratham: Email already registered
+2025-10-07 13:56:07,075 - LMS - INFO - Manager signup request received for email=Pratham@gmail.com
+2025-10-07 13:56:07,618 - LMS - INFO - Created user name=Pratham email=Pratham@gmail.com role=Manager
+2025-10-07 13:56:07,642 - LMS - INFO - Manager registered successfully: Pratham@gmail.com
+2025-10-07 13:56:22,300 - LMS - INFO - Manager Login request received for email=Pratham@gmail.com
+2025-10-07 13:56:22,301 - LMS - INFO - Authentication attempt for email=Pratham@gmail.com
+2025-10-07 13:56:22,831 - LMS - INFO - Authentication successful for email=Pratham@gmail.com
+2025-10-07 13:56:22,831 - LMS - INFO - Manager login successful for email=Pratham@gmail.com
