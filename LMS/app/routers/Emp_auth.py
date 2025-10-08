@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from app.models.schemas import Emp_login_Input, Emp_create_Input, Signup_response, Login_TokenOutput
+from app.db.mongodb import leave_collection
+from app.models.schemas import Emp_login_Input, Emp_create_Input, Signup_response, Login_TokenOutput, LeaveRequest
 from app.services.auth_service import create_user, authenticate_user, create_access_token
 from app.utils.logger import logger  
+from datetime import datetime
 
 router = APIRouter(prefix="/api/v1/Emp_auth", tags=["Auth"])
 templates = Jinja2Templates(directory="app/templates")
@@ -33,7 +35,43 @@ def login(data: Emp_login_Input):
     logger.info("Employee login successful for email=%s", data.email)
     return {"access_token": token, "token_type": "bearer"}
 
+Emp_router = APIRouter(prefix="/api/v1/Emp_dash", tags=["Dashboard"])
 
-@router.get("/emp_dash", response_class=HTMLResponse)
+@Emp_router.get("/Employee_Dashboard", response_class=HTMLResponse)
 async def get_emp_dash(request: Request):
-    return templates.TemplateResponse("emp_dash.html", {"request": request})
+    return templates.TemplateResponse("employee_dashboard.html", {"request": request})
+
+@Emp_router.post("/submit")
+async def submit_leave(request: Request, leave: LeaveRequest):
+    """
+    Handles submission of a leave application by an employee.
+    """
+    try:
+        # Convert dates to datetime objects for DB consistency
+        start_date = datetime.strptime(leave.startDate, "%Y-%m-%d")
+        end_date = datetime.strptime(leave.endDate, "%Y-%m-%d")
+
+        leave_doc = {
+            "employee_id": leave.employee_id,
+            "title": leave.leaveTitle,
+            "start_date": start_date,
+            "end_date": end_date,
+            "days": leave.days,
+            "description": leave.description,
+            "status": leave.status,
+            "icon": leave.icon,
+            "applied_on": datetime.utcnow()
+        }
+
+        result = await leave_collection.insert_one(leave_doc)
+
+        return {"message": "Leave request submitted successfully!", "id": str(result.inserted_id)}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@Emp_router.get("/my_leaves")
+async def get_my_leaves(employee_id: str):
+    leaves = await leave_collection.find({"employee_id": employee_id}).to_list(100)
+    return leaves
+

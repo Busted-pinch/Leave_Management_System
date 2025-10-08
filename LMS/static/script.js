@@ -1,4 +1,6 @@
-// Tab Switching Functions
+// ==========================
+// 🔹 UI & Tab Switching
+// ==========================
 function switchLoginTab(type) {
     const tabs = document.querySelectorAll('#loginPage .tab-btn');
     const forms = document.querySelectorAll('#loginPage .form-content');
@@ -31,23 +33,18 @@ function switchRegisterTab(type) {
     }
 }
 
-// Page Navigation
+// ==========================
+// 🔹 Page Navigation
+// ==========================
 function showPage(page) {
     const pages = ['loginPage', 'registerPage', 'dashboardPage'];
-    pages.forEach(p => {
-        document.getElementById(p).classList.add('hidden');
-    });
-    
-    if (page === 'login') {
-        document.getElementById('loginPage').classList.remove('hidden');
-    } else if (page === 'register') {
-        document.getElementById('registerPage').classList.remove('hidden');
-    } else if (page === 'dashboard') {
-        document.getElementById('dashboardPage').classList.remove('hidden');
-    }
+    pages.forEach(p => document.getElementById(p).classList.add('hidden'));
+    document.getElementById(`${page}Page`).classList.remove('hidden');
 }
 
-// Dashboard Section Navigation
+// ==========================
+// 🔹 Dashboard Navigation
+// ==========================
 function showDashboardSection(section) {
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.page-section');
@@ -56,58 +53,132 @@ function showDashboardSection(section) {
     sections.forEach(sec => sec.classList.remove('active'));
     
     event.target.closest('.nav-item').classList.add('active');
+    document.getElementById(`${section}Section`).classList.add('active');
+}
+
+// ==========================
+// 🔹 Backend API base
+// ==========================
+const API_BASE = "http://127.0.0.1:8000/api/v1/Emp_auth";
+
+// ==========================
+// 🔹 Helper function
+// ==========================
+async function apiRequest(url, method, body = null) {
+    const options = {
+        method,
+        headers: { "Content-Type": "application/json" }
+    };
+    if (body) options.body = JSON.stringify(body);
     
-    if (section === 'profile') {
-        document.getElementById('profileSection').classList.add('active');
-    } else if (section === 'apply') {
-        document.getElementById('applySection').classList.add('active');
-    } else if (section === 'status') {
-        document.getElementById('statusSection').classList.add('active');
-    } else if (section === 'history') {
-        document.getElementById('historySection').classList.add('active');
+    const res = await fetch(url, options);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Server Error");
+    return data;
+}
+
+// ==========================
+// 🔹 Employee Registration
+// ==========================
+async function registerEmployee(event) {
+    event.preventDefault();
+    const name = document.getElementById("empName").value;
+    const email = document.getElementById("empEmail").value;
+    const dept = document.getElementById("empDept").value;
+    const password = document.getElementById("empPass").value;
+    const confirmpass = document.getElementById("empConfirmPass").value;
+
+    try {
+        const data = await apiRequest(`${API_BASE}/Employee_signup`, "POST", {
+            name, email, dept, password, confirmpass
+        });
+        alert(data.message || "Employee registration successful!");
+        showPage("login");
+    } catch (err) {
+        alert("Registration failed: " + err.message);
     }
 }
 
-// Form Submissions
-function loginEmployee(event) {
+// ==========================
+// 🔹 Employee Login
+// ==========================
+async function loginEmployee(event) {
     event.preventDefault();
-    // TODO: Implement backend login logic.
-    // On success, populate user data and show dashboard.
-    alert('Employee login successful!');
-    showPage('dashboard');
+    const email = document.getElementById("loginEmpEmail").value;
+    const password = document.getElementById("loginEmpPass").value;
+
+    try {
+        const data = await apiRequest(`${API_BASE}/Employee_login`, "POST", { email, password });
+        localStorage.setItem("token", data.access_token);
+        alert("Login successful!");
+        showPage("dashboard");
+    } catch (err) {
+        alert("Login failed: " + err.message);
+    }
 }
 
-function registerEmployee(event) {
+// ==========================
+// 🔹 Leave Submission
+// ==========================
+async function submitLeave(event) {
     event.preventDefault();
-    // TODO: Implement backend registration logic.
-    alert('Employee registration successful! Please login.');
-    showPage('login');
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Please login first!");
+        showPage("login");
+        return;
+    }
+
+    const leaveData = {
+        employee_id: document.getElementById("employeeId").value,
+        leaveTitle: document.getElementById("leaveTitle").value,
+        startDate: document.getElementById("startDate").value,
+        endDate: document.getElementById("endDate").value,
+        days: document.getElementById("leaveDays").value,
+        description: document.getElementById("leaveDescription").value,
+        status: "Pending",
+        icon: "📝"
+    };
+
+    try {
+        const res = await fetch("http://127.0.0.1:8000/api/v1/Emp_dash/submit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(leaveData)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to submit leave");
+        alert(data.message);
+        event.target.reset();
+    } catch (err) {
+        alert("Error submitting leave: " + err.message);
+    }
 }
 
-function registerHR(event) {
-    event.preventDefault();
-    // TODO: Implement backend registration logic.
-    alert('HR registration successful! Please login.');
-    showPage('login');
-}
-
-function submitLeave(event) {
-    event.preventDefault();
-    // TODO: Implement backend logic to submit leave.
-    alert('Leave request submitted successfully!');
-    event.target.reset();
-}
-
+// ==========================
+// 🔹 Logout
+// ==========================
 function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        // TODO: Add backend logout logic if necessary (e.g., invalidate session).
-        showPage('login');
+    if (confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem("token");
+        showPage("login");
     }
 }
 
-function loginHR(event) {
+// ==========================
+// 🔹 HR Functions (future)
+// ==========================
+async function registerHR(event) {
     event.preventDefault();
-    // TODO: Implement backend login logic before redirect.
-    // On success, redirect to the HR dashboard.
-    window.location.href = 'hr_dashboard.html';
+    alert("HR registration functionality coming soon!");
+}
+
+async function loginHR(event) {
+    event.preventDefault();
+    alert("HR login functionality coming soon!");
+    // window.location.href = "hr_dashboard.html";
 }

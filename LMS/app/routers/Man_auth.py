@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from app.models.schemas import Man_login_Input, Man_create_Input, Signup_response, Login_TokenOutput
+from app.models.schemas import Man_login_Input, Man_create_Input, Signup_response, Login_TokenOutput, LeaveRequest
 from app.services.auth_service import create_user, authenticate_user, create_access_token
-from app.utils.logger import logger  
+from app.db.mongodb import leave_collection
+from app.utils.logger import logger
+from bson import ObjectId
 
 templates = Jinja2Templates(directory="app/templates")
 router = APIRouter(prefix="/api/v1/Man_auth", tags=["Auth"])
@@ -34,7 +36,36 @@ def login(data: Man_login_Input):
     logger.info("Manager login successful for email=%s", data.email)
     return {"access_token": token, "token_type": "bearer"}
 
+Man_router = APIRouter(prefix="/api/v1/Man_Dash", tags=["Dashboard"])
 
-@router.get("/hr_dashboard", response_class=HTMLResponse)
+@Man_router.get("/Manager_Dashboard", response_class=HTMLResponse)
 async def get_hr_dashboard(request: Request):
     return templates.TemplateResponse("hr_dashboard.html", {"request": request})
+
+# Get all leave requests
+@Man_router.get("/leave_requests")
+async def get_all_leaves():
+    leaves = await leave_collection.find({}).to_list(100)
+    return leaves
+
+# Approve leave
+@Man_router.post("/leave/{leave_id}/approve")
+async def approve_leave(leave_id: str):
+    result = await leave_collection.update_one(
+        {"_id": ObjectId(leave_id)},
+        {"$set": {"status": "approved"}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Leave not found")
+    return {"message": "Leave approved successfully"}
+
+# Reject leave
+@Man_router.post("/leave/{leave_id}/reject")
+async def reject_leave(leave_id: str):
+    result = await leave_collection.update_one(
+        {"_id": ObjectId(leave_id)},
+        {"$set": {"status": "rejected"}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Leave not found")
+    return {"message": "Leave rejected successfully"}

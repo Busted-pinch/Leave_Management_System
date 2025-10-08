@@ -28,3 +28,13 @@ class Signup_response(BaseModel):
 class Login_TokenOutput(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+class LeaveRequest(BaseModel):
+    employee_id: str
+    leaveTitle: str
+    startDate: str
+    endDate: str
+    days: int
+    description: str
+    status: str
+    icon: str

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Dashboard - Leave Management System</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -163,252 +163,200 @@
             </div>
         </div>
     </div>
+<script>
+    let leaveRequests = [
+        {
+            id: 1,
+            leaveTitle: 'Annual Vacation',
+            startDate: '2025-10-15',
+            endDate: '2025-10-20',
+            days: 6,
+            description: 'Family vacation to Goa',
+            status: 'approved',
+            icon: 'fas fa-umbrella-beach'
+        },
+        {
+            id: 2,
+            leaveTitle: 'Sick Leave',
+            startDate: '2025-10-10',
+            endDate: '2025-10-11',
+            days: 2,
+            description: 'Flu and fever',
+            status: 'pending',
+            icon: 'fas fa-heartbeat'
+        },
+        {
+            id: 3,
+            leaveTitle: 'Personal Work',
+            startDate: '2025-09-05',
+            endDate: '2025-09-05',
+            days: 1,
+            description: 'Bank work and documentation',
+            status: 'rejected',
+            icon: 'fas fa-briefcase'
+        }
+    ];
 
-    <script>
-        // Sample leave data (this would typically come from backend)
-        let leaveRequests = [
-            {
-                id: 1,
-                leaveTitle: 'Annual Vacation',
-                startDate: '2025-10-15',
-                endDate: '2025-10-20',
-                days: 6,
-                description: 'Family vacation to Goa',
-                status: 'approved',
-                icon: 'fas fa-umbrella-beach'
-            },
-            {
-                id: 2,
-                leaveTitle: 'Sick Leave',
-                startDate: '2025-10-10',
-                endDate: '2025-10-11',
-                days: 2,
-                description: 'Flu and fever',
-                status: 'pending',
-                icon: 'fas fa-heartbeat'
-            },
-            {
-                id: 3,
-                leaveTitle: 'Personal Work',
-                startDate: '2025-09-05',
-                endDate: '2025-09-05',
-                days: 1,
-                description: 'Bank work and documentation',
-                status: 'rejected',
-                icon: 'fas fa-briefcase'
-            }
-        ];
+    document.addEventListener('DOMContentLoaded', function() {
+        loadEmployeeProfile();
+        renderLeaveStatus();
+        renderLeaveHistory();
+        setMinDate();
+    });
 
-        // Initialize dashboard on load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadEmployeeProfile();
+    function setMinDate() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').setAttribute('min', today);
+        document.getElementById('endDate').setAttribute('min', today);
+    }
+
+    function loadEmployeeProfile() {
+        // TODO: Fetch from backend API if needed
+    }
+
+    function showDashboardSection(section) {
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.page-section');
+
+        navItems.forEach(item => item.classList.remove('active'));
+        sections.forEach(sec => sec.classList.remove('active'));
+
+        event.target.closest('.nav-item').classList.add('active');
+
+        if (section === 'profile') document.getElementById('profileSection').classList.add('active');
+        else if (section === 'apply') document.getElementById('applySection').classList.add('active');
+        else if (section === 'status') {
+            document.getElementById('statusSection').classList.add('active');
+            renderLeaveStatus();
+        }
+        else if (section === 'history') {
+            document.getElementById('historySection').classList.add('active');
+            renderLeaveHistory();
+        }
+    }
+
+    function renderLeaveStatus() {
+        const container = document.getElementById('leaveStatusCards');
+        if (leaveRequests.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:#6b7280; grid-column:1/-1;">
+                <i class="fas fa-inbox" style="font-size:64px; color:#e5e7eb; margin-bottom:16px; display:block;"></i>
+                <p style="font-size:16px; font-weight:500;">No leave requests found</p>
+            </div>`;
+            return;
+        }
+        container.innerHTML = leaveRequests.map(req => `
+            <div class="leave-card ${req.status}">
+                <div class="leave-card-header">
+                    <div class="leave-icon"><i class="${req.icon}"></i></div>
+                    <span class="status-badge ${req.status}">
+                        <i class="fas fa-${req.status==='approved'?'check-circle':req.status==='rejected'?'times-circle':'hourglass-half'}"></i>
+                        ${req.status.charAt(0).toUpperCase()+req.status.slice(1)}
+                    </span>
+                </div>
+                <div class="leave-title">${req.leaveTitle}</div>
+                <div class="leave-dates"><i class="fas fa-calendar-alt"></i> ${formatDate(req.startDate)} - ${formatDate(req.endDate)}</div>
+                <div class="leave-footer"><span class="leave-days"><i class="fas fa-clock"></i> ${req.days} day${req.days>1?'s':''}</span></div>
+            </div>
+        `).join('');
+    }
+
+    function renderLeaveHistory() {
+        const tbody = document.getElementById('leaveHistoryTableBody');
+        if (leaveRequests.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#6b7280;">No leave history available</td></tr>`;
+            return;
+        }
+        const sorted = [...leaveRequests].sort((a,b)=>new Date(b.startDate)-new Date(a.startDate));
+        tbody.innerHTML = sorted.map(req=>`
+            <tr>
+                <td><strong>${req.leaveTitle}</strong></td>
+                <td>${formatDate(req.startDate)}</td>
+                <td>${formatDate(req.endDate)}</td>
+                <td>${req.days} day${req.days>1?'s':''}</td>
+                <td><span class="status-badge ${req.status}"><i class="fas fa-${req.status==='approved'?'check-circle':req.status==='rejected'?'times-circle':'hourglass-half'}"></i> ${req.status.charAt(0).toUpperCase()+req.status.slice(1)}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    function calculateDays(start, end) {
+        const diff = Math.abs(new Date(end)-new Date(start));
+        return Math.ceil(diff/(1000*60*60*24))+1;
+    }
+
+    function getLeaveIcon(title) {
+        const t = title.toLowerCase();
+        if(t.includes('sick')) return 'fas fa-heartbeat';
+        if(t.includes('vacation')||t.includes('holiday')) return 'fas fa-umbrella-beach';
+        if(t.includes('personal')) return 'fas fa-briefcase';
+        if(t.includes('emergency')) return 'fas fa-exclamation-triangle';
+        if(t.includes('marriage')||t.includes('wedding')) return 'fas fa-ring';
+        if(t.includes('maternity')||t.includes('paternity')) return 'fas fa-baby';
+        return 'fas fa-calendar-alt';
+    }
+
+    async function submitLeave(event) {
+        event.preventDefault();
+        const title = document.getElementById('leaveTitle').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const description = document.getElementById('leaveDescription').value;
+
+        if(new Date(endDate) < new Date(startDate)){
+            alert('End date cannot be before start date!');
+            return;
+        }
+
+        const days = calculateDays(startDate,endDate);
+        const icon = getLeaveIcon(title);
+
+        const leaveData = {
+            employee_id: document.getElementById('employeeId').textContent, // dynamic
+            leaveTitle: title,
+            startDate,
+            endDate,
+            days,
+            description,
+            status: 'pending',
+            icon
+        };
+
+        try {
+            const res = await fetch('/api/leave/submit', {
+                method: 'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify(leaveData)
+            });
+
+            if(!res.ok) throw new Error(`Server returned ${res.status}`);
+            const data = await res.json();
+            alert(data.message || 'Leave request submitted successfully!');
+
+            // Add to local array and update UI
+            leaveRequests.push({...leaveData, id: leaveRequests.length+1});
             renderLeaveStatus();
             renderLeaveHistory();
-            setMinDate();
-        });
-
-        // Set minimum date to today for date inputs
-        function setMinDate() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').setAttribute('min', today);
-            document.getElementById('endDate').setAttribute('min', today);
-        }
-
-        // Load employee profile (would typically fetch from backend)
-        function loadEmployeeProfile() {
-            // TODO: Fetch from backend API
-            // Example: const response = await fetch('/api/employee/profile');
-            // For now, using placeholder data already in HTML
-        }
-
-        // Dashboard Section Navigation
-        function showDashboardSection(section) {
-            const navItems = document.querySelectorAll('.nav-item');
-            const sections = document.querySelectorAll('.page-section');
-            
-            navItems.forEach(item => item.classList.remove('active'));
-            sections.forEach(sec => sec.classList.remove('active'));
-            
-            event.target.closest('.nav-item').classList.add('active');
-            
-            if (section === 'profile') {
-                document.getElementById('profileSection').classList.add('active');
-            } else if (section === 'apply') {
-                document.getElementById('applySection').classList.add('active');
-            } else if (section === 'status') {
-                document.getElementById('statusSection').classList.add('active');
-                renderLeaveStatus();
-            } else if (section === 'history') {
-                document.getElementById('historySection').classList.add('active');
-                renderLeaveHistory();
-            }
-        }
-
-        // Render leave status cards
-        function renderLeaveStatus() {
-            const container = document.getElementById('leaveStatusCards');
-            
-            if (leaveRequests.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 60px 20px; color: #6b7280; grid-column: 1 / -1;">
-                        <i class="fas fa-inbox" style="font-size: 64px; color: #e5e7eb; margin-bottom: 16px; display: block;"></i>
-                        <p style="font-size: 16px; font-weight: 500;">No leave requests found</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = leaveRequests.map(request => `
-                <div class="leave-card ${request.status}">
-                    <div class="leave-card-header">
-                        <div class="leave-icon">
-                            <i class="${request.icon}"></i>
-                        </div>
-                        <span class="status-badge ${request.status}">
-                            <i class="fas fa-${request.status === 'approved' ? 'check-circle' : request.status === 'rejected' ? 'times-circle' : 'hourglass-half'}"></i> 
-                            ${request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                        </span>
-                    </div>
-                    
-                    <div class="leave-title">${request.leaveTitle}</div>
-                    
-                    <div class="leave-dates">
-                        <i class="fas fa-calendar-alt"></i>
-                        ${formatDate(request.startDate)} - ${formatDate(request.endDate)}
-                    </div>
-                    
-                    <div class="leave-footer">
-                        <span class="leave-days">
-                            <i class="fas fa-clock"></i> ${request.days} day${request.days > 1 ? 's' : ''}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Render leave history table
-        function renderLeaveHistory() {
-            const tbody = document.getElementById('leaveHistoryTableBody');
-            
-            if (leaveRequests.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 40px; color: #6b7280;">
-                            No leave history available
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            // Sort by date (newest first)
-            const sortedRequests = [...leaveRequests].sort((a, b) => 
-                new Date(b.startDate) - new Date(a.startDate)
-            );
-            
-            tbody.innerHTML = sortedRequests.map(request => `
-                <tr>
-                    <td><strong>${request.leaveTitle}</strong></td>
-                    <td>${formatDate(request.startDate)}</td>
-                    <td>${formatDate(request.endDate)}</td>
-                    <td>${request.days} day${request.days > 1 ? 's' : ''}</td>
-                    <td>
-                        <span class="status-badge ${request.status}">
-                            <i class="fas fa-${request.status === 'approved' ? 'check-circle' : request.status === 'rejected' ? 'times-circle' : 'hourglass-half'}"></i>
-                            ${request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // Calculate days between two dates
-        function calculateDays(startDate, endDate) {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            const diffTime = Math.abs(end - start);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end dates
-            return diffDays;
-        }
-
-        // Get appropriate icon based on leave title
-        function getLeaveIcon(title) {
-            const lowerTitle = title.toLowerCase();
-            if (lowerTitle.includes('sick')) return 'fas fa-heartbeat';
-            if (lowerTitle.includes('vacation') || lowerTitle.includes('holiday')) return 'fas fa-umbrella-beach';
-            if (lowerTitle.includes('personal')) return 'fas fa-briefcase';
-            if (lowerTitle.includes('emergency')) return 'fas fa-exclamation-triangle';
-            if (lowerTitle.includes('marriage') || lowerTitle.includes('wedding')) return 'fas fa-ring';
-            if (lowerTitle.includes('maternity') || lowerTitle.includes('paternity')) return 'fas fa-baby';
-            return 'fas fa-calendar-alt';
-        }
-
-        // Submit leave form
-        function submitLeave(event) {
-            event.preventDefault();
-            
-            const title = document.getElementById('leaveTitle').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const description = document.getElementById('leaveDescription').value;
-            
-            // Validate dates
-            if (new Date(endDate) < new Date(startDate)) {
-                alert('End date cannot be before start date!');
-                return;
-            }
-            
-            const days = calculateDays(startDate, endDate);
-            const icon = getLeaveIcon(title);
-            
-            // Create new leave request
-            const newRequest = {
-                id: leaveRequests.length + 1,
-                leaveTitle: title,
-                startDate: startDate,
-                endDate: endDate,
-                days: days,
-                description: description,
-                status: 'pending',
-                icon: icon
-            };
-            
-            // TODO: Send to backend API
-            // Example: await fetch('/api/leave/submit', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(newRequest)
-            // });
-            
-            // Add to local array (temporary - would normally come from backend)
-            leaveRequests.push(newRequest);
-            
-            alert('Leave request submitted successfully!');
-            event.target.reset();
-            
-            // Switch to status section to show the new request
             showDashboardSection('status');
-            
-            // Update the active nav item
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.querySelectorAll('.nav-item')[2].classList.add('active'); // Status tab
+            document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[2].classList.add('active'); // status tab
+            event.target.reset();
+        } catch(err){
+            console.error('Error submitting leave:', err);
+            alert('Failed to submit leave request. Please try again later.');
         }
+    }
 
-        // Format date helper function
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return date.toLocaleDateString('en-US', options);
-        }
+    function formatDate(dateStr){
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+    }
 
-        // Logout function
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                // TODO: Backend API call to logout
-                // Example: await fetch('/api/logout', { method: 'POST' });
-                window.location.href = 'index.html';
-            }
+    function logout(){
+        if(confirm('Are you sure you want to logout?')){
+            // TODO: call backend logout API if needed
+            window.location.href='index.html';
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>

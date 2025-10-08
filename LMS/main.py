@@ -40,7 +40,9 @@ app.add_middleware(
 # Routers
 # ==============================
 app.include_router(Emp_auth.router)
+app.include_router(Emp_auth.Emp_router)
 app.include_router(Man_auth.router)
+app.include_router(Man_auth.Man_router)
 
 # ==============================
 # Endpoints

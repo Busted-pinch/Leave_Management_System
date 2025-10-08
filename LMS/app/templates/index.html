@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Leave Management System</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -33,32 +33,33 @@
             </button>
         </div>
 
-        <div id="employeeLoginForm" class="form-content active">
-            <form onsubmit="loginEmployee(event)">
-                <div class="form-group">
-                    <label><i class="fas fa-envelope"></i> Email Address</label>
-                    <input type="email" placeholder="your.email@company.com" required>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" placeholder="Enter your password" required>
-                </div>
-                <button type="submit" class="btn-primary">
-                    <span>Login</span>
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-            </form>
-        </div>
+    <div id="employeeLoginForm" class="form-content active">
+        <form onsubmit="loginEmployee(event)">
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email Address</label>
+                <input type="email" id="loginEmpEmail" placeholder="your.email@company.com" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="loginEmpPass" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn-primary">
+                <span>Login</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+
 
         <div id="hrLoginForm" class="form-content">
             <form onsubmit="loginHR(event)">
                 <div class="form-group">
                     <label><i class="fas fa-envelope"></i> Email Address</label>
-                    <input type="email" placeholder="hr.admin@company.com" required>
+                    <input type="email" id="loginHrEmail" placeholder="hr.admin@company.com" required>
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" placeholder="Enter your password" required>
+                    <input type="password" id= "loginHrPass" placeholder="Enter your password" required>
                 </div>
                 <button type="submit" class="btn-primary">
                     <span>Login</span>
@@ -90,19 +91,19 @@
             </button>
         </div>
 
-        <div id="employeeRegisterForm" class="form-content active">
-            <form onsubmit="registerEmployee(event)">
-                <div class="form-group">
-                    <label><i class="fas fa-user"></i> Full Name</label>
-                    <input type="text" placeholder="John Doe" required>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-envelope"></i> Email Address</label>
-                    <input type="email" placeholder="your.email@company.com" required>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-building"></i> Department</label>
-                    <select required>
+    <div id="employeeRegisterForm" class="form-content active">
+        <form onsubmit="registerEmployee(event)">
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Full Name</label>
+                <input type="text" id="empName" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email Address</label>
+                <input type="email" id="empEmail" placeholder="your.email@company.com" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-building"></i> Department</label>
+                <select id="empDept" required>
                         <option value="">Select Department</option>
                         <option value="IT">Information Technology</option>
                         <option value="HR">Human Resources</option>
@@ -114,11 +115,11 @@
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" placeholder="Create a strong password" required>
+                    <input type="password" id="empPass" placeholder="Create a strong password" required>
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Confirm Password</label>
-                    <input type="password" placeholder="Confirm your password" required>
+                    <input type="password" id="empConfirmPass" placeholder="Confirm your password" required>
                 </div>
                 <button type="submit" class="btn-primary">
                     <span>Create Account</span>
@@ -151,11 +152,11 @@
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" placeholder="Create a strong password" required>
+                    <input type="password" id="hrPass" placeholder="Create a strong password" required>
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Confirm Password</label>
-                    <input type="password" placeholder="Confirm your password" required>
+                    <input type="password" id="hrConfirmPass" placeholder="Confirm your password" required>
                 </div>
                 <button type="submit" class="btn-primary">
                     <span>Create Account</span>
@@ -169,84 +170,7 @@
         </div>
     </div>
 
-    <script>
-        // Tab Switching Functions
-        function switchLoginTab(type) {
-            const tabs = document.querySelectorAll('#loginPage .tab-btn');
-            const forms = document.querySelectorAll('#loginPage .form-content');
-            
-            tabs.forEach(tab => tab.classList.remove('active'));
-            forms.forEach(form => form.classList.remove('active'));
-            
-            if (type === 'employee') {
-                tabs[0].classList.add('active');
-                document.getElementById('employeeLoginForm').classList.add('active');
-            } else {
-                tabs[1].classList.add('active');
-                document.getElementById('hrLoginForm').classList.add('active');
-            }
-        }
+    <script src="/static/script.js"></script>
 
-        function switchRegisterTab(type) {
-            const tabs = document.querySelectorAll('#registerPage .tab-btn');
-            const forms = document.querySelectorAll('#registerPage .form-content');
-            
-            tabs.forEach(tab => tab.classList.remove('active'));
-            forms.forEach(form => form.classList.remove('active'));
-            
-            if (type === 'employee') {
-                tabs[0].classList.add('active');
-                document.getElementById('employeeRegisterForm').classList.add('active');
-            } else {
-                tabs[1].classList.add('active');
-                document.getElementById('hrRegisterForm').classList.add('active');
-            }
-        }
-
-        // Page Navigation
-        function showPage(page) {
-            const loginPage = document.getElementById('loginPage');
-            const registerPage = document.getElementById('registerPage');
-            
-            if (page === 'login') {
-                loginPage.classList.remove('hidden');
-                registerPage.classList.add('hidden');
-            } else if (page === 'register') {
-                loginPage.classList.add('hidden');
-                registerPage.classList.remove('hidden');
-            }
-        }
-
-        // Form Submissions
-        function loginEmployee(event) {
-            event.preventDefault();
-            // TODO: Implement backend login logic.
-            // On success, redirect to employee dashboard.
-            alert('Employee login successful!');
-            window.location.href = 'employee_dashboard.html';
-        }
-
-        function loginHR(event) {
-            event.preventDefault();
-            // TODO: Implement backend login logic.
-            // On success, redirect to HR dashboard.
-            alert('HR login successful!');
-            window.location.href = 'hr_dashboard.html';
-        }
-
-        function registerEmployee(event) {
-            event.preventDefault();
-            // TODO: Implement backend registration logic.
-            alert('Employee registration successful! Please login.');
-            showPage('login');
-        }
-
-        function registerHR(event) {
-            event.preventDefault();
-            // TODO: Implement backend registration logic.
-            alert('HR registration successful! Please login.');
-            showPage('login');
-        }
-    </script>
 </body>
 </html>
