@@ -1,140 +1,176 @@
 import os
-from passlib.context import CryptContext
-from jose import jwt
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from datetime import datetime
+from passlib.context import CryptContext
+from jose import jwt
+from fastapi import HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from bson import ObjectId
-from app.db.mongodb import users_collection, leave_collection
-from app.utils.logger import logger
+from app.db.mongodb import users_collection, leave_collection, db
 
-# Load .env file
 load_dotenv()
-
 SECRET_KEY = os.getenv("SECRET_KEY", "default_secret")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+security = HTTPBearer()
 
+# ==========================
+# Password utils
+# ==========================
 def hash_password(password: str) -> str:
     return pwd_context.hash(password[:72])
 
-def verify_password(plain_password: str, hashed: str) -> bool:
-    return pwd_context.verify(plain_password, hashed)
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)
 
-def create_access_token(data: dict):
+# ==========================
+# JWT utils
+# ==========================
+def create_access_token(data: dict, expires_delta: int = ACCESS_TOKEN_EXPIRE_MINUTES):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=expires_delta)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-    to_encode = data.copy()  # Copy payload to avoid mutating original
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)  # Set expiration
-    to_encode.update({"exp": expire})  # Add expiration claim
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)  # Encode token
+def decode_token(token: str) -> dict:
+    try:
+        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
-def create_user(name: str, email: str, dept: str, password: str, role: str = "Employee"):
-    """
-    Create a new user and return a JWT token.
-    Returns: dict with 'access_token' and 'token_type'
-    Raises: ValueError if email already exists
-    """
+# ==========================
+# Current user
+# ==========================
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    payload = decode_token(token)
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    user = users_collection.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {
+        "user_id": str(user["_id"]),
+        "employee_id": user.get("employee_id"),
+        "name": user["name"],
+        "email": user["email"],
+        "department": user["department"],
+        "role": user.get("role", "Employee")
+    }
+
+# ==========================
+# Employee ID generator
+# ==========================
+def get_next_employee_number():
+    counter = db.counters.find_one_and_update(
+        {"_id": "employee_number"},
+        {"$inc": {"seq": 1}},
+        upsert=True,
+        return_document=True
+    )
+    return f"EMP{counter['seq']:03d}"
+
+# ==========================
+# User creation
+# ==========================
+def create_user(name: str, email: str, department: str, password: str, role: str = "Employee"):
+    # 1️⃣ Check email uniqueness
     if users_collection.find_one({"email": email}):
-        logger.warning("Attempt to re-register email: %s", email)
-        raise ValueError("Email already registered")
+        raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Prepare user document
+    # 2️⃣ Generate Employee ID if Employee
+    employee_id = get_next_employee_number() if role == "Employee" else None
+
+    # 3️⃣ Insert into DB
     user_doc = {
         "name": name,
         "email": email,
-        "department": dept,
+        "department": department,
         "password": hash_password(password),
         "role": role
     }
+    if employee_id:
+        user_doc["employee_id"] = employee_id
 
-    # Insert into MongoDB
     result = users_collection.insert_one(user_doc)
-    logger.info("Created user name=%s email=%s role=%s", name, email, role)
 
-    # ✅ Prepare token payload
-    token_data = {
+    # 4️⃣ Prepare user info
+    user_info = {
         "user_id": str(result.inserted_id),
+        "employee_id": employee_id,
+        "name": name,
         "email": email,
+        "department": department,
         "role": role
     }
 
-    # ✅ Generate access token
-    access_token = create_access_token(token_data)
+    # 5️⃣ Generate token after successful insert
+    access_token = create_access_token({
+        "user_id": user_info["user_id"],
+        "email": email,
+        "role": role
+    })
 
-    # Return token
     return {
         "access_token": access_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "user": user_info
     }
 
-
-# ✅ Updated authentication to return JWT token
+# ==========================
+# Authenticate user
+# ==========================
 def authenticate_user(email: str, password: str):
-    """
-    Authenticate user and return JWT token if successful.
-    Returns: dict with 'access_token' and 'token_type'
-    Raises: ValueError on failure
-    """
-    logger.info("Authentication attempt for email=%s", email)
-    
     user = users_collection.find_one({"email": email})
-    if not user:
-        logger.warning("Authentication failed: user not found, email=%s", email)
-        raise ValueError("Invalid email or password")
-    
-    if not verify_password(password, user["password"]):
-        logger.warning("Authentication failed: invalid password, email=%s", email)
-        raise ValueError("Invalid email or password")
-    
-    # ✅ Prepare token payload
-    token_data = {
-        "user_id": str(user["_id"]),  # Include user ID
-        "email": user["email"],       # Include email
-        "role": user.get("role", "employee")  # Include role, default employee
-    }
-    
-    # ✅ Generate access token
-    access_token = create_access_token(token_data)
-    
-    logger.info("Authentication successful for email=%s", email)
-    
-    # ✅ Return token in standard format
-    return {
-        "access_token": access_token,
-        "token_type": "bearer"
+    if not user or not verify_password(password, user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    user_info = {
+        "user_id": str(user["_id"]),
+        "employee_id": user.get("employee_id"),
+        "name": user["name"],
+        "email": user["email"],
+        "department": user["department"],
+        "role": user.get("role", "Employee")
     }
 
-def submit_leave(employee_id: str, subject: str, body: str):
+    return {
+        "access_token": create_access_token({
+            "user_id": user_info["user_id"],
+            "email": user_info["email"],
+            "role": user_info["role"]
+        }),
+        "token_type": "bearer",
+        "user": user_info
+    }
+
+# ==========================
+# Leave submission
+# ==========================
+def submit_leave(employee_id: str, employee_name: str, employee_email: str, employee_dept: str,
+                 leaveTitle: str, startDate: str, endDate: str, days: int, description: str,
+                 status: str = "Pending", icon: str = "📝"):
+
     leave_doc = {
         "employee_id": employee_id,
-        "subject": subject,
-        "body": body,
-        "status": "pending",  # pending, approved, rejected
-        "created_at": datetime.utcnow(),
+        "employee_name": employee_name,
+        "employee_email": employee_email,
+        "employee_dept": employee_dept,
+        "title": leaveTitle,
+        "start_date": datetime.strptime(startDate, "%Y-%m-%d"),
+        "end_date": datetime.strptime(endDate, "%Y-%m-%d"),
+        "days": days,
+        "description": description,
+        "status": status,
+        "icon": icon,
+        "applied_on": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     }
     result = leave_collection.insert_one(leave_doc)
     leave_doc["_id"] = str(result.inserted_id)
     return leave_doc
-
-def decide_leave(leave_id: str, decision: str):
-    if decision not in ["approved", "rejected"]:
-        raise ValueError("Decision must be 'approved' or 'rejected'")
-
-    result = leave_collection.update_one(
-        {"_id": ObjectId(leave_id)},
-        {"$set": {"status": decision, "updated_at": datetime.utcnow()}}
-    )
-    if result.matched_count == 0:
-        raise ValueError("Leave application not found")
-    return True
-
-def get_pending_leaves():
-    leaves = []
-    cursor = leave_collection.find({"status": "pending"})
-    for doc in cursor:
-        doc["_id"] = str(doc["_id"])
-        leaves.append(doc)
-    return leaves

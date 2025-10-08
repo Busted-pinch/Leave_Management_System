@@ -1,77 +1,79 @@
-from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from app.db.mongodb import leave_collection
-from app.models.schemas import Emp_login_Input, Emp_create_Input, Signup_response, Login_TokenOutput, LeaveRequest
-from app.services.auth_service import create_user, authenticate_user, create_access_token
-from app.utils.logger import logger  
-from datetime import datetime
+from fastapi import APIRouter, HTTPException, Depends
+from app.models.schemas import UserCreateInput, SignupResponse, LoginInput, LoginTokenOutput, LeaveRequest
+from app.services.auth_service import create_user, authenticate_user, submit_leave, get_current_user
 
 router = APIRouter(prefix="/api/v1/Emp_auth", tags=["Auth"])
-templates = Jinja2Templates(directory="app/templates")
+Emp_router = APIRouter(prefix="/api/v1/Emp_Dash", tags=["Dashboard"])
 
-@router.post("/Employee_signup", response_model=Signup_response)
-def Emp_signup(data: Emp_create_Input):
-    logger.info("Employee signup request received for email=%s", data.email)
-    if data.password != data.confirmpass:
-        logger.warning("Signup failed: Passwords do not match for email=%s", data.email)
-        raise HTTPException(status_code=400, detail="Passwords do not match")
-    try:
-        create_user(data.name, data.email, data.dept, data.password, role='Employee')
-        logger.info("Employee registered successfully: %s", data.email)
-        return {"message": "Employee registered"}
-    except Exception as e:
-        logger.error("Signup failed for Manager=%s: %s", data.name, e)
-        raise HTTPException(status_code=400, detail=str(e))
+# ==========================
+# Employee Signup
+# ==========================
+@router.post("/Employee_signup", response_model=SignupResponse)
+def employee_signup(data: UserCreateInput):
+    return create_user(data.name, data.email, data.department, data.password, role="Employee")
 
+# ==========================
+# Employee Login
+# ==========================
+@router.post("/Employee_login", response_model=LoginTokenOutput)
+def employee_login(data: LoginInput):
+    return authenticate_user(data.email, data.password)
 
-@router.post("/Employee_login", response_model=Login_TokenOutput)
-def login(data: Emp_login_Input):
-    logger.info("Employee Login request received for email=%s", data.email)
-    if not authenticate_user(data.email, data.password):
-        logger.warning("Login failed for Employee=%s: Invalid credentials", data.email)
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    token = create_access_token({"sub": data.email})
-    logger.info("Employee login successful for email=%s", data.email)
-    return {"access_token": token, "token_type": "bearer"}
+# ==========================
+# Current Employee
+# ==========================
+def get_current_employee(user: dict = Depends(get_current_user)):
+    if user.get("role") != "Employee":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return user
 
-Emp_router = APIRouter(prefix="/api/v1/Emp_dash", tags=["Dashboard"])
-
-@Emp_router.get("/Employee_Dashboard", response_class=HTMLResponse)
-async def get_emp_dash(request: Request):
-    return templates.TemplateResponse("employee_dashboard.html", {"request": request})
-
+# ==========================
+# Submit Leave
+# ==========================
 @Emp_router.post("/submit")
-async def submit_leave(request: Request, leave: LeaveRequest):
-    """
-    Handles submission of a leave application by an employee.
-    """
-    try:
-        # Convert dates to datetime objects for DB consistency
-        start_date = datetime.strptime(leave.startDate, "%Y-%m-%d")
-        end_date = datetime.strptime(leave.endDate, "%Y-%m-%d")
+def submit_leave_endpoint(data: LeaveRequest, current_user: dict = Depends(get_current_employee)):
+    leave_doc = submit_leave(
+        employee_id=current_user["employee_id"],
+        employee_name=current_user["name"],
+        employee_email=current_user["email"],
+        employee_dept=current_user["department"],
+        leaveTitle=data.leaveTitle,
+        startDate=data.startDate,
+        endDate=data.endDate,
+        days=data.days,
+        description=data.description
+    )
+    return {"message": "Leave submitted", "leave": leave_doc}
 
-        leave_doc = {
-            "employee_id": leave.employee_id,
-            "title": leave.leaveTitle,
-            "start_date": start_date,
-            "end_date": end_date,
-            "days": leave.days,
-            "description": leave.description,
-            "status": leave.status,
-            "icon": leave.icon,
-            "applied_on": datetime.utcnow()
-        }
-
-        result = await leave_collection.insert_one(leave_doc)
-
-        return {"message": "Leave request submitted successfully!", "id": str(result.inserted_id)}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
+# ==========================
+# Get my leaves
+# ==========================
 @Emp_router.get("/my_leaves")
-async def get_my_leaves(employee_id: str):
-    leaves = await leave_collection.find({"employee_id": employee_id}).to_list(100)
+def get_my_leaves(current_user: dict = Depends(get_current_employee)):
+    from app.db.mongodb import leave_collection
+    leaves_cursor = leave_collection.find({"employee_id": current_user["employee_id"]})
+    leaves = []
+    for lv in leaves_cursor:
+        leaves.append({
+            "leaveId": str(lv["_id"]),
+            "leaveTitle": lv.get("title"),
+            "startDate": lv.get("start_date").strftime("%Y-%m-%d") if lv.get("start_date") else "",
+            "endDate": lv.get("end_date").strftime("%Y-%m-%d") if lv.get("end_date") else "",
+            "days": lv.get("days"),
+            "description": lv.get("description"),
+            "status": lv.get("status"),
+        })
     return leaves
 
+# ==========================
+# Employee profile
+# ==========================
+@router.get("/me")
+def get_employee_profile(current_user: dict = Depends(get_current_employee)):
+    return {
+        "user_id": current_user["user_id"],
+        "employee_id": current_user["employee_id"],
+        "name": current_user["name"],
+        "email": current_user["email"],
+        "department": current_user["department"]
+    }

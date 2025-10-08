@@ -76,3 +76,30 @@
 2025-10-07 13:56:22,301 - LMS - INFO - Authentication attempt for email=Pratham@gmail.com
 2025-10-07 13:56:22,831 - LMS - INFO - Authentication successful for email=Pratham@gmail.com
 2025-10-07 13:56:22,831 - LMS - INFO - Manager login successful for email=Pratham@gmail.com
+2025-10-08 12:23:36,511 - LMS - INFO - Employee Login request received for email=Pr@gmail.com
+2025-10-08 12:23:36,512 - LMS - INFO - Authentication attempt for email=Pr@gmail.com
+2025-10-08 12:23:37,179 - LMS - INFO - Authentication successful for email=Pr@gmail.com
+2025-10-08 12:23:37,182 - LMS - INFO - Employee login successful for email=Pr@gmail.com
+2025-10-08 12:29:18,012 - LMS - INFO - Employee signup request received for email=P@gmail.com
+2025-10-08 12:29:18,638 - LMS - INFO - Created user name=P email=P@gmail.com role=Employee
+2025-10-08 12:29:18,663 - LMS - INFO - Employee registered successfully: P@gmail.com
+2025-10-08 12:29:34,450 - LMS - INFO - Employee Login request received for email=P@gmail.com
+2025-10-08 12:29:34,451 - LMS - INFO - Authentication attempt for email=P@gmail.com
+2025-10-08 12:29:35,014 - LMS - INFO - Authentication successful for email=P@gmail.com
+2025-10-08 12:29:35,016 - LMS - INFO - Employee login successful for email=P@gmail.com
+2025-10-08 12:47:18,679 - LMS - INFO - Employee Login request received for email=P@gmial.com
+2025-10-08 12:47:18,680 - LMS - INFO - Authentication attempt for email=P@gmial.com
+2025-10-08 12:47:18,705 - LMS - WARNING - Authentication failed: user not found, email=P@gmial.com
+2025-10-08 12:47:30,646 - LMS - INFO - Employee Login request received for email=P@gmial.com
+2025-10-08 12:47:30,649 - LMS - INFO - Authentication attempt for email=P@gmial.com
+2025-10-08 12:47:30,653 - LMS - WARNING - Authentication failed: user not found, email=P@gmial.com
+2025-10-08 12:47:38,369 - LMS - INFO - Employee Login request received for email=Pr@gmial.com
+2025-10-08 12:47:38,371 - LMS - INFO - Authentication attempt for email=Pr@gmial.com
+2025-10-08 12:47:38,374 - LMS - WARNING - Authentication failed: user not found, email=Pr@gmial.com
+2025-10-08 12:47:47,140 - LMS - INFO - Employee Login request received for email=Pr@gmial.com
+2025-10-08 12:47:47,141 - LMS - INFO - Authentication attempt for email=Pr@gmial.com
+2025-10-08 12:47:47,143 - LMS - WARNING - Authentication failed: user not found, email=Pr@gmial.com
+2025-10-08 13:15:18,513 - LMS - INFO - Employee Login request received for email=P@gmail.com
+2025-10-08 13:15:18,515 - LMS - INFO - Authentication attempt for email=P@gmail.com
+2025-10-08 13:15:19,142 - LMS - INFO - Authentication successful for email=P@gmail.com
+2025-10-08 13:15:19,145 - LMS - INFO - Employee login successful for email=P@gmail.com

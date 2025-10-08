@@ -1,71 +1,117 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from app.models.schemas import Man_login_Input, Man_create_Input, Signup_response, Login_TokenOutput, LeaveRequest
-from app.services.auth_service import create_user, authenticate_user, create_access_token
-from app.db.mongodb import leave_collection
-from app.utils.logger import logger
+from app.models.schemas import UserCreateInput, SignupResponse, LoginInput, LoginTokenOutput
+from app.services.auth_service import create_user, authenticate_user, get_current_user
+from app.db.mongodb import leave_collection, users_collection
 from bson import ObjectId
+from datetime import datetime
 
 templates = Jinja2Templates(directory="app/templates")
 router = APIRouter(prefix="/api/v1/Man_auth", tags=["Auth"])
-
-
-@router.post("/Manager_signup", response_model=Signup_response)
-def Emp_signup(data: Man_create_Input):
-    logger.info("Manager signup request received for email=%s", data.email)
-    if data.password != data.confirmpass:
-        logger.warning("Signup failed: Passwords do not match for email=%s", data.email)
-        raise HTTPException(status_code=400, detail="Passwords do not match")
-    try:
-        create_user(data.name, data.email, data.dept, data.password, role='Manager')
-        logger.info("Manager registered successfully: %s", data.email)
-        return {"message": "Manager registered"}
-    except Exception as e:
-        logger.error("Signup failed for Manager=%s: %s", data.name, e)
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.post("/Manager_login", response_model=Login_TokenOutput)
-def login(data: Man_login_Input):
-    logger.info("Manager Login request received for email=%s", data.email)
-    if not authenticate_user(data.email, data.password):
-        logger.warning("Login failed for Manager=%s: Invalid credentials", data.email)
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    token = create_access_token({"sub": data.email})
-    logger.info("Manager login successful for email=%s", data.email)
-    return {"access_token": token, "token_type": "bearer"}
-
 Man_router = APIRouter(prefix="/api/v1/Man_Dash", tags=["Dashboard"])
 
+# ==========================
+# Manager Signup
+# ==========================
+@router.post("/Manager_signup", response_model=SignupResponse)
+def manager_signup(data: UserCreateInput):
+    return create_user(data.name, data.email, data.department, data.password, role="Manager")
+
+# ==========================
+# Manager Login
+# ==========================
+@router.post("/Manager_login", response_model=LoginTokenOutput)
+def manager_login(data: LoginInput):
+    return authenticate_user(data.email, data.password)
+
+# ==========================
+# Current Manager
+# ==========================
+def get_current_manager(user: dict = Depends(get_current_user)):
+    if user.get("role") != "Manager":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return user
+
+# ==========================
+# Manager Dashboard (HTML)
+# ==========================
 @Man_router.get("/Manager_Dashboard", response_class=HTMLResponse)
-async def get_hr_dashboard(request: Request):
+def get_manager_dashboard(request: Request, current_user: dict = Depends(get_current_manager)):
     return templates.TemplateResponse("hr_dashboard.html", {"request": request})
 
-# Get all leave requests
+# ==========================
+# View all leave requests
+# ==========================
 @Man_router.get("/leave_requests")
-async def get_all_leaves():
-    leaves = await leave_collection.find({}).to_list(100)
+def get_all_leaves(current_user: dict = Depends(get_current_manager)):
+    leaves = list(leave_collection.find({}))
+    for leave in leaves:
+        leave["_id"] = str(leave["_id"])
     return leaves
 
-# Approve leave
-@Man_router.post("/leave/{leave_id}/approve")
-async def approve_leave(leave_id: str):
-    result = await leave_collection.update_one(
-        {"_id": ObjectId(leave_id)},
-        {"$set": {"status": "approved"}}
-    )
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Leave not found")
-    return {"message": "Leave approved successfully"}
+# =========================
+# ✅ Approve Leave
+# =========================
+@Man_router.post("/approve_leave/{leave_id}")
+def approve_leave(leave_id: str, current_user: dict = Depends(get_current_manager)):
+    result = leave_collection.update_one({"_id": ObjectId(leave_id)}, {"$set": {"status": "Approved"}})
+    if result.modified_count:
+        return {"message": "Leave approved successfully!"}
+    return {"message": "Leave not found or already processed"}
 
-# Reject leave
-@Man_router.post("/leave/{leave_id}/reject")
-async def reject_leave(leave_id: str):
-    result = await leave_collection.update_one(
-        {"_id": ObjectId(leave_id)},
-        {"$set": {"status": "rejected"}}
-    )
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Leave not found")
-    return {"message": "Leave rejected successfully"}
+# =========================
+# ✅ Reject Leave
+# =========================
+@Man_router.post("/reject_leave/{leave_id}")
+def reject_leave(leave_id: str, current_user: dict = Depends(get_current_manager)):
+    result = leave_collection.update_one({"_id": ObjectId(leave_id)}, {"$set": {"status": "Rejected"}})
+    if result.modified_count:
+        return {"message": "Leave rejected successfully!"}
+    return {"message": "Leave not found or already processed"}
+
+
+# ==========================
+# List all employees
+# ==========================
+@Man_router.get("/employees")
+def get_employees(current_user: dict = Depends(get_current_manager)):
+    employees_cursor = users_collection.find({"role": "Employee"})
+    employees = []
+    for emp in employees_cursor:
+        employees.append({
+            "employee_id": emp.get("employee_id", "-"),
+            "name": emp.get("name", "-"),
+            "email": emp.get("email", "-"),
+            "department": emp.get("department", "-"),
+            "status": emp.get("status", "Active")
+        })
+    return employees
+
+
+
+# ==========================
+# Get pending leaves
+# ==========================
+@Man_router.get("/leave_requests")
+def get_all_leaves(current_user: dict = Depends(get_current_manager)):
+    leaves_cursor = leave_collection.find({})
+    leaves = []
+    for lv in leaves_cursor:
+        leaves.append({
+            "id": str(lv["_id"]),
+            "leaveTitle": lv["title"],
+            "employee_name": lv["employee_name"],
+            "startDate": lv["start_date"].strftime("%Y-%m-%d") if lv.get("start_date") else None,
+            "endDate": lv["end_date"].strftime("%Y-%m-%d") if lv.get("end_date") else None,
+            "status": lv.get("status", "Pending")
+        })
+    return leaves
+
+
+# ==========================
+# Manager profile
+# ==========================
+@router.get("/me")
+def get_manager_profile(current_user: dict = Depends(get_current_manager)):
+    return current_user

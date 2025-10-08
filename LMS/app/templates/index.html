@@ -33,33 +33,32 @@
             </button>
         </div>
 
-    <div id="employeeLoginForm" class="form-content active">
-        <form onsubmit="loginEmployee(event)">
-            <div class="form-group">
-                <label><i class="fas fa-envelope"></i> Email Address</label>
-                <input type="email" id="loginEmpEmail" placeholder="your.email@company.com" required>
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-lock"></i> Password</label>
-                <input type="password" id="loginEmpPass" placeholder="Enter your password" required>
-            </div>
-            <button type="submit" class="btn-primary">
-                <span>Login</span>
-                <i class="fas fa-arrow-right"></i>
-            </button>
-        </form>
-    </div>
-
+        <div id="employeeLoginForm" class="form-content active">
+            <form onsubmit="loginEmployee(event)" autocomplete="off" novalidate>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="loginEmpEmail" placeholder="your.email@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="loginEmpPass" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <span>Login</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
 
         <div id="hrLoginForm" class="form-content">
-            <form onsubmit="loginHR(event)">
+            <form onsubmit="loginHR(event)" autocomplete="off" novalidate>
                 <div class="form-group">
                     <label><i class="fas fa-envelope"></i> Email Address</label>
                     <input type="email" id="loginHrEmail" placeholder="hr.admin@company.com" required>
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id= "loginHrPass" placeholder="Enter your password" required>
+                    <input type="password" id="loginHrPass" placeholder="Enter your password" required>
                 </div>
                 <button type="submit" class="btn-primary">
                     <span>Login</span>
@@ -91,19 +90,19 @@
             </button>
         </div>
 
-    <div id="employeeRegisterForm" class="form-content active">
-        <form onsubmit="registerEmployee(event)">
-            <div class="form-group">
-                <label><i class="fas fa-user"></i> Full Name</label>
-                <input type="text" id="empName" placeholder="John Doe" required>
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-envelope"></i> Email Address</label>
-                <input type="email" id="empEmail" placeholder="your.email@company.com" required>
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-building"></i> Department</label>
-                <select id="empDept" required>
+        <div id="employeeRegisterForm" class="form-content active">
+            <form onsubmit="registerEmployee(event)" autocomplete="off" novalidate>
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" id="empName" name="name" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="empEmail" name="email" placeholder="your.email@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-building"></i> Department</label>
+                    <select id="empDept" name="dept" required>
                         <option value="">Select Department</option>
                         <option value="IT">Information Technology</option>
                         <option value="HR">Human Resources</option>
@@ -115,11 +114,11 @@
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id="empPass" placeholder="Create a strong password" required>
+                    <input type="password" id="empPass" name="password" placeholder="Create a strong password" required>
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Confirm Password</label>
-                    <input type="password" id="empConfirmPass" placeholder="Confirm your password" required>
+                    <input type="password" id="empConfirmPass" name="confirmpass" placeholder="Confirm your password" required>
                 </div>
                 <button type="submit" class="btn-primary">
                     <span>Create Account</span>
@@ -129,19 +128,19 @@
         </div>
 
         <div id="hrRegisterForm" class="form-content">
-            <form onsubmit="registerHR(event)">
+            <form onsubmit="registerHR(event)" autocomplete="off" novalidate>
                 <div class="form-group">
                     <label><i class="fas fa-user"></i> Full Name</label>
-                    <input type="text" placeholder="Jane Smith" required>
+                    <input type="text" id="hrName" name="name" placeholder="Jane Smith" required>
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-envelope"></i> Email Address</label>
-                    <input type="email" placeholder="hr.admin@company.com" required>
+                    <input type="email" id="hrEmail" name="email" placeholder="hr.admin@company.com" required>
                 </div>
                 <div class="form-group">
-                    <label><i class="fas fa-building"></i> Department (Optional)</label>
-                    <select>
-                        <option value="">Select Department</option>
+                    <label><i class="fas fa-building"></i> Department</label>
+                    <select id="hrDept" name="department" required>
+                        <option value="" disabled selected>Select Department</option>
                         <option value="IT">Information Technology</option>
                         <option value="HR">Human Resources</option>
                         <option value="Finance">Finance</option>
@@ -152,11 +151,11 @@
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id="hrPass" placeholder="Create a strong password" required>
+                    <input type="password" id="hrPass" name="password" placeholder="Create a strong password" required>
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Confirm Password</label>
-                    <input type="password" id="hrConfirmPass" placeholder="Confirm your password" required>
+                    <input type="password" id="hrConfirmPass" name="confirmpass" placeholder="Confirm your password" required>
                 </div>
                 <button type="submit" class="btn-primary">
                     <span>Create Account</span>
@@ -172,5 +171,21 @@
 
     <script src="/static/script.js"></script>
 
+    <script>
+        // Auto-focus input when switching tabs
+        const oldSwitchLoginTab = switchLoginTab;
+        switchLoginTab = function(type) {
+            oldSwitchLoginTab(type);
+            const firstInput = document.querySelector(`#${type}LoginForm input`);
+            if(firstInput) firstInput.focus();
+        };
+
+        const oldSwitchRegisterTab = switchRegisterTab;
+        switchRegisterTab = function(type) {
+            oldSwitchRegisterTab(type);
+            const firstInput = document.querySelector(`#${type}RegisterForm input`);
+            if(firstInput) firstInput.focus();
+        };
+    </script>
 </body>
 </html>

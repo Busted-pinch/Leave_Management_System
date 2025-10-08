@@ -22,19 +22,19 @@
                 <span>Leave Management</span>
             </div>
             <div class="navbar-menu">
-                <div class="nav-item active" onclick="showDashboardSection('profile')">
+                <div class="nav-item active" onclick="showDashboardSection('profile', event)">
                     <i class="fas fa-user-circle"></i>
                     <span>Profile</span>
                 </div>
-                <div class="nav-item" onclick="showDashboardSection('apply')">
+                <div class="nav-item" onclick="showDashboardSection('apply', event)">
                     <i class="fas fa-paper-plane"></i>
                     <span>Apply Leave</span>
                 </div>
-                <div class="nav-item" onclick="showDashboardSection('status')">
+                <div class="nav-item" onclick="showDashboardSection('status', event)">
                     <i class="fas fa-clock"></i>
                     <span>Status</span>
                 </div>
-                <div class="nav-item" onclick="showDashboardSection('history')">
+                <div class="nav-item" onclick="showDashboardSection('history', event)">
                     <i class="fas fa-history"></i>
                     <span>History</span>
                 </div>
@@ -46,6 +46,7 @@
         </nav>
 
         <div class="dashboard-content">
+            <!-- Profile Section -->
             <div id="profileSection" class="page-section active">
                 <div class="section-header">
                     <h2><i class="fas fa-user-circle"></i> My Profile</h2>
@@ -85,13 +86,10 @@
                             </div>
                         </div>
                     </div>
-                    <button class="btn-edit">
-                        <i class="fas fa-edit"></i>
-                        <span>Edit Profile</span>
-                    </button>
                 </div>
             </div>
 
+            <!-- Apply Leave Section -->
             <div id="applySection" class="page-section">
                 <div class="section-header">
                     <h2><i class="fas fa-paper-plane"></i> Apply for Leave</h2>
@@ -117,7 +115,7 @@
                         </div>
                         <div class="form-group">
                             <label><i class="fas fa-comment-dots"></i> Description</label>
-                            <textarea id="leaveDescription" placeholder="Please provide details about your leave request..." required></textarea>
+                            <textarea id="leaveDescription" placeholder="Provide details about your leave request..." required></textarea>
                         </div>
                         <button type="submit" class="btn-primary">
                             <span>Submit Request</span>
@@ -127,16 +125,16 @@
                 </div>
             </div>
 
+            <!-- Leave Status Section -->
             <div id="statusSection" class="page-section">
                 <div class="section-header">
                     <h2><i class="fas fa-clock"></i> Leave Status</h2>
                     <p>Track your leave requests</p>
                 </div>
-                <div class="leave-cards" id="leaveStatusCards">
-                    <!-- Leave cards will be populated here -->
-                </div>
+                <div class="leave-cards" id="leaveStatusCards"></div>
             </div>
 
+            <!-- Leave History Section -->
             <div id="historySection" class="page-section">
                 <div class="section-header">
                     <h2><i class="fas fa-history"></i> Leave History</h2>
@@ -154,209 +152,28 @@
                                     <th><i class="fas fa-info-circle"></i> Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="leaveHistoryTableBody">
-                                <!-- Leave history will be populated here -->
-                            </tbody>
+                            <tbody id="leaveHistoryTableBody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-<script>
-    let leaveRequests = [
-        {
-            id: 1,
-            leaveTitle: 'Annual Vacation',
-            startDate: '2025-10-15',
-            endDate: '2025-10-20',
-            days: 6,
-            description: 'Family vacation to Goa',
-            status: 'approved',
-            icon: 'fas fa-umbrella-beach'
-        },
-        {
-            id: 2,
-            leaveTitle: 'Sick Leave',
-            startDate: '2025-10-10',
-            endDate: '2025-10-11',
-            days: 2,
-            description: 'Flu and fever',
-            status: 'pending',
-            icon: 'fas fa-heartbeat'
-        },
-        {
-            id: 3,
-            leaveTitle: 'Personal Work',
-            startDate: '2025-09-05',
-            endDate: '2025-09-05',
-            days: 1,
-            description: 'Bank work and documentation',
-            status: 'rejected',
-            icon: 'fas fa-briefcase'
+
+    <!-- Dashboard Section Switching Script -->
+    <script>
+        function showDashboardSection(section, event) {
+            const sections = document.querySelectorAll('.page-section');
+            sections.forEach(s => s.classList.remove('active'));
+
+            const navItems = document.querySelectorAll('.navbar-menu .nav-item');
+            navItems.forEach(nav => nav.classList.remove('active'));
+
+            document.getElementById(section + 'Section').classList.add('active');
+            event.currentTarget.classList.add('active');
         }
-    ];
+    </script>
 
-    document.addEventListener('DOMContentLoaded', function() {
-        loadEmployeeProfile();
-        renderLeaveStatus();
-        renderLeaveHistory();
-        setMinDate();
-    });
-
-    function setMinDate() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('startDate').setAttribute('min', today);
-        document.getElementById('endDate').setAttribute('min', today);
-    }
-
-    function loadEmployeeProfile() {
-        // TODO: Fetch from backend API if needed
-    }
-
-    function showDashboardSection(section) {
-        const navItems = document.querySelectorAll('.nav-item');
-        const sections = document.querySelectorAll('.page-section');
-
-        navItems.forEach(item => item.classList.remove('active'));
-        sections.forEach(sec => sec.classList.remove('active'));
-
-        event.target.closest('.nav-item').classList.add('active');
-
-        if (section === 'profile') document.getElementById('profileSection').classList.add('active');
-        else if (section === 'apply') document.getElementById('applySection').classList.add('active');
-        else if (section === 'status') {
-            document.getElementById('statusSection').classList.add('active');
-            renderLeaveStatus();
-        }
-        else if (section === 'history') {
-            document.getElementById('historySection').classList.add('active');
-            renderLeaveHistory();
-        }
-    }
-
-    function renderLeaveStatus() {
-        const container = document.getElementById('leaveStatusCards');
-        if (leaveRequests.length === 0) {
-            container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:#6b7280; grid-column:1/-1;">
-                <i class="fas fa-inbox" style="font-size:64px; color:#e5e7eb; margin-bottom:16px; display:block;"></i>
-                <p style="font-size:16px; font-weight:500;">No leave requests found</p>
-            </div>`;
-            return;
-        }
-        container.innerHTML = leaveRequests.map(req => `
-            <div class="leave-card ${req.status}">
-                <div class="leave-card-header">
-                    <div class="leave-icon"><i class="${req.icon}"></i></div>
-                    <span class="status-badge ${req.status}">
-                        <i class="fas fa-${req.status==='approved'?'check-circle':req.status==='rejected'?'times-circle':'hourglass-half'}"></i>
-                        ${req.status.charAt(0).toUpperCase()+req.status.slice(1)}
-                    </span>
-                </div>
-                <div class="leave-title">${req.leaveTitle}</div>
-                <div class="leave-dates"><i class="fas fa-calendar-alt"></i> ${formatDate(req.startDate)} - ${formatDate(req.endDate)}</div>
-                <div class="leave-footer"><span class="leave-days"><i class="fas fa-clock"></i> ${req.days} day${req.days>1?'s':''}</span></div>
-            </div>
-        `).join('');
-    }
-
-    function renderLeaveHistory() {
-        const tbody = document.getElementById('leaveHistoryTableBody');
-        if (leaveRequests.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#6b7280;">No leave history available</td></tr>`;
-            return;
-        }
-        const sorted = [...leaveRequests].sort((a,b)=>new Date(b.startDate)-new Date(a.startDate));
-        tbody.innerHTML = sorted.map(req=>`
-            <tr>
-                <td><strong>${req.leaveTitle}</strong></td>
-                <td>${formatDate(req.startDate)}</td>
-                <td>${formatDate(req.endDate)}</td>
-                <td>${req.days} day${req.days>1?'s':''}</td>
-                <td><span class="status-badge ${req.status}"><i class="fas fa-${req.status==='approved'?'check-circle':req.status==='rejected'?'times-circle':'hourglass-half'}"></i> ${req.status.charAt(0).toUpperCase()+req.status.slice(1)}</span></td>
-            </tr>
-        `).join('');
-    }
-
-    function calculateDays(start, end) {
-        const diff = Math.abs(new Date(end)-new Date(start));
-        return Math.ceil(diff/(1000*60*60*24))+1;
-    }
-
-    function getLeaveIcon(title) {
-        const t = title.toLowerCase();
-        if(t.includes('sick')) return 'fas fa-heartbeat';
-        if(t.includes('vacation')||t.includes('holiday')) return 'fas fa-umbrella-beach';
-        if(t.includes('personal')) return 'fas fa-briefcase';
-        if(t.includes('emergency')) return 'fas fa-exclamation-triangle';
-        if(t.includes('marriage')||t.includes('wedding')) return 'fas fa-ring';
-        if(t.includes('maternity')||t.includes('paternity')) return 'fas fa-baby';
-        return 'fas fa-calendar-alt';
-    }
-
-    async function submitLeave(event) {
-        event.preventDefault();
-        const title = document.getElementById('leaveTitle').value;
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        const description = document.getElementById('leaveDescription').value;
-
-        if(new Date(endDate) < new Date(startDate)){
-            alert('End date cannot be before start date!');
-            return;
-        }
-
-        const days = calculateDays(startDate,endDate);
-        const icon = getLeaveIcon(title);
-
-        const leaveData = {
-            employee_id: document.getElementById('employeeId').textContent, // dynamic
-            leaveTitle: title,
-            startDate,
-            endDate,
-            days,
-            description,
-            status: 'pending',
-            icon
-        };
-
-        try {
-            const res = await fetch('/api/leave/submit', {
-                method: 'POST',
-                headers:{'Content-Type':'application/json'},
-                body: JSON.stringify(leaveData)
-            });
-
-            if(!res.ok) throw new Error(`Server returned ${res.status}`);
-            const data = await res.json();
-            alert(data.message || 'Leave request submitted successfully!');
-
-            // Add to local array and update UI
-            leaveRequests.push({...leaveData, id: leaveRequests.length+1});
-            renderLeaveStatus();
-            renderLeaveHistory();
-            showDashboardSection('status');
-            document.querySelectorAll('.nav-item').forEach(item=>item.classList.remove('active'));
-            document.querySelectorAll('.nav-item')[2].classList.add('active'); // status tab
-            event.target.reset();
-        } catch(err){
-            console.error('Error submitting leave:', err);
-            alert('Failed to submit leave request. Please try again later.');
-        }
-    }
-
-    function formatDate(dateStr){
-        const d = new Date(dateStr);
-        return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-    }
-
-    function logout(){
-        if(confirm('Are you sure you want to logout?')){
-            // TODO: call backend logout API if needed
-            window.location.href='index.html';
-        }
-    }
-</script>
-
+    <script src="/static/script.js"></script>
 </body>
 </html>

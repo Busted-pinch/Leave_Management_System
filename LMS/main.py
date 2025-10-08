@@ -1,64 +1,59 @@
 import os
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+
+# ==============================
+# FastAPI app setup
 # ==============================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 app = FastAPI(title="Employee Leave Management System - Unified Backend")
 
-templates = Jinja2Templates(directory="app/templates")  # point to your templates folder
+templates = Jinja2Templates(directory="app/templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Home page (login/registration)
-@app.get("/", response_class=HTMLResponse)
-def read_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-# Import all routers
-# NOTE: This assumes the routers are correctly structured in the app/routers directory
-from app.routers import (
-    Emp_auth,
-    Man_auth,
-)
-
 
 # ==============================
 # CORS setup
 # ==============================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # later restrict to frontend domain
+    allow_origins=["*"],  # Restrict to your frontend domain in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ==============================
-# Routers
+# Import routers
 # ==============================
+from app.routers import Emp_auth, Man_auth
+
 app.include_router(Emp_auth.router)
 app.include_router(Emp_auth.Emp_router)
 app.include_router(Man_auth.router)
 app.include_router(Man_auth.Man_router)
 
 # ==============================
-# Endpoints
+# HTML Routes (No auth here)
 # ==============================
-#@app.post("/Application", tags=["Application process"])
-#def get(request: Application):
-#    try:
-#    
-#        return {
-            
-#        }
-#    except Exception as e:
-#        raise HTTPException(status_code=500, detail=str(e))
+@app.get("/", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/employee_dashboard", response_class=HTMLResponse)
+def employee_dashboard(request: Request):
+    # Page loads regardless of auth
+    return templates.TemplateResponse("employee_dashboard.html", {"request": request})
+
+@app.get("/hr_dashboard", response_class=HTMLResponse)
+def hr_dashboard(request: Request):
+    # Page loads regardless of auth
+    return templates.TemplateResponse("hr_dashboard.html", {"request": request})
 
 # ==============================
-# Root endpoint
+# Test API
 # ==============================
 @app.get("/api/v1/test")
 def test():

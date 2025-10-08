@@ -1,40 +1,37 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
-class Man_create_Input(BaseModel):
+# Reusable user create input
+class UserCreateInput(BaseModel):
     name: str
     email: EmailStr
-    dept: str
+    department: str
     password: str
-    confirmpass: str
 
-class Emp_create_Input(BaseModel):
+class UserData(BaseModel):
+    user_id: Optional[str]
+    employee_id: Optional[str]
     name: str
     email: EmailStr
-    dept: str
-    password: str
-    confirmpass: str
+    department: str
+    role: Optional[str] = "Employee"
 
-class Emp_login_Input(BaseModel):
+class SignupResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserData
+
+class LoginInput(BaseModel):
     email: EmailStr
     password: str
 
-class Man_login_Input(BaseModel):
-    email: EmailStr
-    password: str
-
-class Signup_response(BaseModel):
-    message: str
-
-class Login_TokenOutput(BaseModel):
+class LoginTokenOutput(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
 class LeaveRequest(BaseModel):
-    employee_id: str
     leaveTitle: str
     startDate: str
     endDate: str
     days: int
     description: str
-    status: str
-    icon: str
