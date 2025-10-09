@@ -10,11 +10,13 @@ class UserCreateInput(BaseModel):
 
 class UserData(BaseModel):
     user_id: Optional[str]
-    employee_id: Optional[str]
+    employee_id: Optional[str]  # now optional
+    manager_id: Optional[str]   # add manager_id
     name: str
     email: EmailStr
-    department: str
-    role: Optional[str] = "Employee"
+    dept: str
+    role: str = "employee"
+
 
 class SignupResponse(BaseModel):
     access_token: str
@@ -28,6 +30,8 @@ class LoginInput(BaseModel):
 class LoginTokenOutput(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    user: Optional[UserData]  # include user details
+
 
 class LeaveRequest(BaseModel):
     leaveTitle: str

@@ -11,3 +11,4 @@ db = client["leave_management"]  # database name
 # collections
 users_collection = db["users"]
 leave_collection = db["leave_applications"]
+leave_collection_history = db["leave_history"]

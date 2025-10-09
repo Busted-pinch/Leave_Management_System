@@ -173,11 +173,16 @@ async function loadEmployeeProfile() {
     if (!token) return;
     try {
         const user = await apiRequest(`${EMP_AUTH_BASE}/me`, "GET", null, token);
-        ["employeeName", "employeeEmail", "employeeDepartment", "employeeId"].forEach(id => {
-            document.getElementById(id).innerText = user[id.replace("employee","").toLowerCase()] || "-";
-        });
-    } catch (err) { alert("Failed to load profile: " + err.message); }
+        document.getElementById("employeeName").innerText = user.name || "-";
+        document.getElementById("employeeEmail").innerText = user.email || "-";
+        document.getElementById("employeeDepartment").innerText = user.department || "-";
+        document.getElementById("employeeId").innerText = user.employee_id || "-"; // ✅ Use employee_id
+    } catch (err) { 
+        alert("Failed to load profile: " + err.message); 
+    }
 }
+
+
 
 async function loadLeaveStatus() {
     const token = getToken();
@@ -244,11 +249,16 @@ async function loadHRProfile() {
 
     try {
         const user = await apiRequest(`${MAN_AUTH_BASE}/me`, "GET", null, token);
-        ["hrName","hrEmail","hrDepartment","hrId","hrRole"].forEach(id => {
-            document.getElementById(id).innerText = user[id.replace("hr","").toLowerCase()] || "-";
-        });
-    } catch (err) { alert("Failed to load profile: " + err.message); }
+        document.getElementById("hrName").innerText = user.name || "-";
+        document.getElementById("hrEmail").innerText = user.email || "-";
+        document.getElementById("hrDepartment").innerText = user.department || "-";
+        document.getElementById("hrId").innerText = user.manager_id || "-"; // ✅ Use manager_id
+        document.getElementById("hrRole").innerText = user.role || "-";
+    } catch (err) { 
+        alert("Failed to load profile: " + err.message); 
+    }
 }
+
 
 // ==========================
 // 🔹 Load Pending Leaves (HR)
@@ -302,47 +312,72 @@ async function decideLeave(leaveId, action) {
     const token = getToken();
     if (!token) return alert("Please login first!");
     try {
-        const data = await apiRequest(`${MAN_DASH_BASE}/${action}_leave/${leaveId}`, "POST", null, token);
+        const data = await apiRequest(`${MAN_DASH_BASE}/${action}_leave/${leaveId}`, "PUT", null, token);
         alert(data.message || `Leave ${action}d successfully!`);
         loadPendingLeaves();
-    } catch (err) { alert(`Error: ${err.message}`); }
+        loadEmployees(); // refresh employee table instantly
+    } catch (err) { 
+        alert(`Error: ${err.message}`); 
+    }
 }
 
+
+// ==========================
+// 🔹 Load Employees + Leave History (HR)
+// ==========================
+// Original loadEmployees()
 async function loadEmployees() {
     const token = getToken();
     const tbody = document.getElementById("hrEmployeeTableBody");
     if (!token || !tbody) return;
-    tbody.innerHTML = leaves?.length
-    ? leaves.map(lv => {
-        const employeeName = lv.employee?.name || lv.employee_name || lv.name || "";
-        const leaveTitle = lv.leaveTitle?.trim() || "";
-        return `<tr>
-            <td>${leaveTitle}</td>
-            <td>${employeeName}</td>
-            <td>${lv.startDate ? formatDate(lv.startDate) : ""}</td>
-            <td>${lv.endDate ? formatDate(lv.endDate) : ""}</td>
-            <td>${lv.days ?? ""}</td>
-            <td>${lv.status || ""}</td>
-        </tr>`;
-    }).join("")
-    : `<tr><td colspan="6">No leave history found</td></tr>`;
 
     try {
-        const employees = await apiRequest(`${MAN_DASH_BASE}/employees`, "GET", null, token);
+        const [employees, leaveHistory] = await Promise.all([
+            apiRequest(`${MAN_DASH_BASE}/employees`, "GET", null, token),
+            apiRequest(`${MAN_DASH_BASE}/employee_leaves`, "GET", null, token)
+        ]);
+
         tbody.innerHTML = "";
-        if (!employees?.length) return tbody.innerHTML = `<tr><td colspan="5">No employees found</td></tr>`;
+
+        if (!employees.length) {
+            tbody.innerHTML = `<tr><td colspan="5">No employees found.</td></tr>`;
+            return;
+        }
 
         employees.forEach(emp => {
-            tbody.innerHTML += `<tr>
-                <td>${emp.employee_id || "-"}</td>
-                <td>${emp.name || "-"}</td>
-                <td>${emp.email || "-"}</td>
-                <td>${emp.department || "-"}</td>
-                <td>${emp.status || "Active"}</td>
-            </tr>`;
+            const empLeaves = leaveHistory.filter(lv => lv.employee_id === emp.employee_id);
+
+            if (empLeaves.length) {
+                empLeaves.forEach(lv => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${emp.employee_id || "-"}</td>
+                            <td>${emp.name || "-"}</td>
+                            <td>${lv.leaveTitle || "-"}</td>
+                            <td>${formatDate(lv.startDate)} → ${formatDate(lv.endDate)}</td>
+                            <td>${lv.status || "-"}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${emp.employee_id || "-"}</td>
+                        <td>${emp.name || "-"}</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                `;
+            }
         });
-    } catch (err) { tbody.innerHTML = `<tr><td colspan="5">Error: ${err.message}</td></tr>`; }
+
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5">Error loading employees: ${err.message}</td></tr>`;
+    }
 }
+
+
 
 // Auto-refresh employee list
 setInterval(() => {

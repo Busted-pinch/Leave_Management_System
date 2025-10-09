@@ -147,5 +147,43 @@
 
     <!-- New HR Dashboard JS -->
     <script src="/static/script.js"></script>
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Handle approve buttons
+  document.querySelectorAll(".btn-approve").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const leaveCard = btn.closest(".leave-card");
+      const statusBadge = leaveCard.querySelector(".status-badge");
+      
+      // Update badge
+      statusBadge.textContent = "Approved";
+      statusBadge.classList.remove("pending", "rejected");
+      statusBadge.classList.add("approved");
+
+      // Optional: update card border color
+      leaveCard.classList.remove("pending", "rejected");
+      leaveCard.classList.add("approved");
+    });
+  });
+
+  // Handle reject buttons
+  document.querySelectorAll(".btn-reject").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const leaveCard = btn.closest(".leave-card");
+      const statusBadge = leaveCard.querySelector(".status-badge");
+      
+      // Update badge
+      statusBadge.textContent = "Rejected";
+      statusBadge.classList.remove("pending", "approved");
+      statusBadge.classList.add("rejected");
+
+      // Optional: update card border color
+      leaveCard.classList.remove("pending", "approved");
+      leaveCard.classList.add("rejected");
+    });
+  });
+});
+</script>
+
 </body>
 </html>

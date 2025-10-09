@@ -1,13 +1,18 @@
 import os
 from datetime import datetime, timedelta
+from uuid import uuid4
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 from jose import jwt
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from bson import ObjectId
-from app.db.mongodb import users_collection, leave_collection, db
+from app.db.mongodb import users_collection, leave_collection, leave_collection_history
+from app.db.counters import get_next_employee_number, get_next_manager_number
 
+# ==========================
+# Load environment
+# ==========================
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY", "default_secret")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
@@ -51,76 +56,85 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     user_id = payload.get("user_id")
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
+
     user = users_collection.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    # Ensure IDs exist
+    if user.get("role") == "Employee" and "employee_id" not in user:
+        user["employee_id"] = str(uuid4())
+        users_collection.update_one({"_id": user["_id"]}, {"$set": {"employee_id": user["employee_id"]}})
+    elif user.get("role") == "Manager" and "manager_id" not in user:
+        user["manager_id"] = str(uuid4())
+        users_collection.update_one({"_id": user["_id"]}, {"$set": {"manager_id": user["manager_id"]}})
+
     return {
         "user_id": str(user["_id"]),
         "employee_id": user.get("employee_id"),
+        "manager_id": user.get("manager_id"),
         "name": user["name"],
         "email": user["email"],
         "department": user["department"],
         "role": user.get("role", "Employee")
     }
 
-# ==========================
-# Employee ID generator
-# ==========================
-def get_next_employee_number():
-    counter = db.counters.find_one_and_update(
-        {"_id": "employee_number"},
-        {"$inc": {"seq": 1}},
-        upsert=True,
-        return_document=True
-    )
-    return f"EMP{counter['seq']:03d}"
 
 # ==========================
-# User creation
+# Create user
 # ==========================
 def create_user(name: str, email: str, department: str, password: str, role: str = "Employee"):
-    # 1️⃣ Check email uniqueness
+    # 1️⃣ Check email uniqueness BEFORE insertion
     if users_collection.find_one({"email": email}):
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # 2️⃣ Generate Employee ID if Employee
-    employee_id = get_next_employee_number() if role == "Employee" else None
-
-    # 3️⃣ Insert into DB
+    # 2️⃣ Generate Employee or Manager ID
+    user_id_number = str(uuid4())
     user_doc = {
         "name": name,
         "email": email,
         "department": department,
         "password": hash_password(password),
-        "role": role
+        "role": role,
     }
-    if employee_id:
-        user_doc["employee_id"] = employee_id
 
-    result = users_collection.insert_one(user_doc)
+    if role == "Employee":
+        user_doc["employee_id"] = user_id_number
+    else:  # Manager
+        user_doc["manager_id"] = user_id_number
 
-    # 4️⃣ Prepare user info
+    # 3️⃣ Insert into DB
+    try:
+        result = users_collection.insert_one(user_doc)
+    except Exception as e:
+        # If insertion fails, nothing is saved
+        raise HTTPException(status_code=500, detail="Database insertion failed: " + str(e))
+
+    # 4️⃣ Prepare user info for response (full mapping)
     user_info = {
         "user_id": str(result.inserted_id),
-        "employee_id": employee_id,
+        "employee_id": user_doc.get("employee_id"),
+        "manager_id": user_doc.get("manager_id"),
         "name": name,
         "email": email,
-        "department": department,
+        "dept": department,  # mapped for Pydantic
         "role": role
     }
 
-    # 5️⃣ Generate token after successful insert
+    # 5️⃣ Create access token
     access_token = create_access_token({
         "user_id": user_info["user_id"],
         "email": email,
         "role": role
     })
 
+    # 6️⃣ Return fully compatible dict
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "user": user_info
     }
+
 
 # ==========================
 # Authenticate user
@@ -130,9 +144,18 @@ def authenticate_user(email: str, password: str):
     if not user or not verify_password(password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
+    # Ensure IDs exist
+    if user.get("role") == "Employee" and "employee_id" not in user:
+        user["employee_id"] = str(uuid4())
+        users_collection.update_one({"_id": user["_id"]}, {"$set": {"employee_id": user["employee_id"]}})
+    elif user.get("role") == "Manager" and "manager_id" not in user:
+        user["manager_id"] = str(uuid4())
+        users_collection.update_one({"_id": user["_id"]}, {"$set": {"manager_id": user["manager_id"]}})
+
     user_info = {
         "user_id": str(user["_id"]),
         "employee_id": user.get("employee_id"),
+        "manager_id": user.get("manager_id"),
         "name": user["name"],
         "email": user["email"],
         "department": user["department"],
@@ -149,13 +172,11 @@ def authenticate_user(email: str, password: str):
         "user": user_info
     }
 
-# ==========================
-# Leave submission
-# ==========================
-def submit_leave(employee_id: str, employee_name: str, employee_email: str, employee_dept: str,
-                 leaveTitle: str, startDate: str, endDate: str, days: int, description: str,
-                 status: str = "Pending", icon: str = "📝"):
 
+# ==========================
+# Submit leave
+# ==========================
+def submit_leave(employee_id, employee_name, employee_email, employee_dept, leaveTitle, startDate, endDate, days, description):
     leave_doc = {
         "employee_id": employee_id,
         "employee_name": employee_name,
@@ -166,11 +187,10 @@ def submit_leave(employee_id: str, employee_name: str, employee_email: str, empl
         "end_date": datetime.strptime(endDate, "%Y-%m-%d"),
         "days": days,
         "description": description,
-        "status": status,
-        "icon": icon,
-        "applied_on": datetime.utcnow(),
-        "updated_at": datetime.utcnow()
+        "status": "Pending",
+        "submitted_at": datetime.now()
     }
+
     result = leave_collection.insert_one(leave_doc)
     leave_doc["_id"] = str(result.inserted_id)
     return leave_doc

@@ -619,7 +619,13 @@ body {
     font-weight: 500;
 }
 
-.status-badge {
+/* ========================== */
+/* Status Badge Colors (Global) */
+/* ========================== */
+.status-badge,
+.leave-card.approved .status-badge,
+.leave-card.rejected .status-badge,
+.leave-card.pending .status-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -631,19 +637,32 @@ body {
     letter-spacing: 0.5px;
 }
 
-.status-badge.approved {
+/* Approved */
+.status-badge.approved,
+.leave-card.approved .status-badge {
     background: #d1fae5;
     color: #10b981;
 }
 
-.status-badge.rejected {
+/* Rejected */
+.status-badge.rejected,
+.leave-card.rejected .status-badge {
     background: #fee2e2;
     color: #ef4444;
 }
 
-.status-badge.pending {
+/* Pending */
+.status-badge.pending,
+.leave-card.pending .status-badge {
     background: #fef3c7;
     color: #f59e0b;
+}
+
+/* Optional: Table cell alignment */
+td .status-badge {
+    display: inline-block;
+    text-align: center;
+    min-width: 70px;
 }
 
 /* Table */
